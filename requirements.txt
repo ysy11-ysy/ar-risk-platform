@@ -1,0 +1,18 @@
+# ============================================================
+# 年报风险智能识别平台 —— 依赖清单(Python 3.10+)
+# 安装: pip install -r requirements.txt
+# 提示: reportlab 用于导出风险评估 PDF 报告;若安装受限可先注释,
+#       报告页会给出"未安装"提示而不影响主流程。
+# ============================================================
+streamlit>=1.36,<2
+pdfplumber>=0.11
+requests>=2.31
+python-dotenv>=1.0
+reportlab>=4.0
+
+# ---- 可选:向量检索增强(计划书中的 RAG 部分)----
+# 默认使用"规则关键词 + 正则定位 + LLM 语义判断"的轻量召回,零额外模型依赖;
+# 如需 FAISS 向量召回,安装下面两个包并在 core/rag.py 中开启 USE_VECTOR_RAG。
+# langchain-community>=0.2
+# faiss-cpu>=1.8
+# sentence-transformers>=2.7
