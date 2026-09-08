@@ -93,7 +93,7 @@ if _ind_now:
                    "故不内置第三方源——请填写可信数据源的 JSON 地址(公司数据网关/付费数据库导出/行业协会统计)。")
         url_val = st.text_input(
             "行业参考 JSON 地址(留空 = 仅用内置基准与人工录入)",
-            value=config.external_ref_url(), key="ext_url",
+            value=getattr(config, "external_ref_url", lambda: "")(), key="ext_url",
             help="期望返回 JSON:{\"industry\": \"制造业\", \"source\": \"来源说明\", \"as_of\": \"口径/截至\", "
                  "\"values\": {\"per_capita_output\": 88.0, \"per_capita_pay\": 9.8, \"gross_margin\": 21.0, "
                  "\"rev_growth\": 4.5}};values 可只含部分键;行业不匹配/格式错误/网络失败会被拒绝且不影响主流程。")
