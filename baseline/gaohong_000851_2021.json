@@ -1,0 +1,38 @@
+{
+  "note": "基准输入:高鸿股份(000851)2021 年报 R001 调试基准。数值来自『豆包复核报告』(亿级,四舍五入到 0.01 亿),单位万元。精确核对年报原文后请更新本文件——输入修正后 machine 输出即随之修正,再以 python scripts/check_baseline.py --update 刷新期望表。",
+  "year": "2021",
+  "company": "大唐高鸿数据网络技术股份有限公司",
+  "unit": "万元",
+  "Y0": {
+    "revenue": 854800,
+    "cost": 811200,
+    "net_profit": 3500,
+    "deduct_profit": -21700,
+    "cfo_net": 19500,
+    "staff_cash_out": 26683,
+    "ar": 286500,
+    "inventory": 100900,
+    "total_assets": 981000,
+    "staff_end": 1270
+  },
+  "Y1": {
+    "revenue": 701800,
+    "cost": 660000,
+    "net_profit": -14000,
+    "cfo_net": -20800,
+    "ar": 387200,
+    "inventory": 107200,
+    "total_assets": 999900
+  },
+  "Y2": {},
+  "quarter": {
+    "q3_rev": 201100,
+    "q4_rev": 328700
+  },
+  "extra": {
+    "top5_customer_ratio": 54.53,
+    "top1_customer_ratio": 18.56,
+    "related_sales_ratio": 0.0,
+    "special_events": "证监会处罚决定书〔2026〕10号认定:2015-2023年通过无商业实质贸易与体外资金循环虚增营收189.03亿元,其中2021年虚增18.05亿元(占当年披露营收85.48亿元的21.11%)"
+  }
+}
