@@ -87,3 +87,12 @@ def llm_cache_ttl_days() -> float:
         return max(0.1, float(os.getenv("LLM_CACHE_TTL_DAYS", "30")))
     except (TypeError, ValueError):
         return 30.0
+
+
+def external_ref_url() -> str:
+    """可选联网增强的默认行业参考 JSON 地址(环境变量 EXTERNAL_REF_URL)。
+
+    联网只作行业基准的可选补充且须人工核对后应用(见 core/external.py);
+    留空表示默认不联网,仅用内置基准表 + 页面人工录入。
+    """
+    return os.getenv("EXTERNAL_REF_URL", "").strip()

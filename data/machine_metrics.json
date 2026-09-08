@@ -1,1298 +1,1423 @@
 {
- "note": "机器可算核心指标(数值硬规则初筛)。level 判定依据《规则库》阈值文本;凡阈值要求'连续N年'用 y0/y1(/y2)判断;要求'结合行业/无合理解释'的,机器只负责计算与异常筛查(给出关注),是否构成风险由大模型/人工在第三步复核。金额单位万元。percent 均按数值(40=40%)。",
- "metrics": [
-  {
-   "id": "m001",
-   "risk_id": "R001",
-   "signal_id": "R001-S01",
-   "signal_name": "收入现金流背离",
-   "name": "净现比",
-   "unit": "倍",
-   "formula": "y0.cfo_net / y0.net_profit",
-   "rules": [
-    {
-     "level": "高风险",
-     "cond": "y0.cfo_net <= 0 or (y0.cfo_net < 0.5*y0.net_profit and y1.cfo_net < 0.5*y1.net_profit)"
-    },
-    {
-     "level": "关注",
-     "cond": "v < 1"
-    }
-   ],
-   "basis": "规则:高风险=净现比连续2年<0.5或任意一年为负;关注=0.5~1;正常>1"
-  },
-  {
-   "id": "m002",
-   "risk_id": "R001",
-   "signal_id": "R001-S01",
-   "signal_name": "收入现金流背离",
-   "name": "收现比",
-   "unit": "倍",
-   "formula": "y0.sales_cash_in / y0.revenue",
-   "rules": [
-    {
-     "level": "高风险",
-     "cond": "v < 1 and y0.sales_cash_in/y0.revenue < y1.sales_cash_in/y1.revenue and y1.sales_cash_in/y1.revenue < y2.sales_cash_in/y2.revenue"
-    },
-    {
-     "level": "关注",
-     "cond": "v < 1"
-    }
-   ],
-   "basis": "规则:收现比<1且连续2年下降=高风险;<1但稳定=关注;≥1正常"
-  },
-  {
-   "id": "m003",
-   "risk_id": "R001",
-   "signal_id": "R001-S01",
-   "signal_name": "收入现金流背离",
-   "name": "营收现金含量",
-   "unit": "倍",
-   "formula": "y0.cfo_inflow / y0.revenue",
-   "rules": [
-    {
-     "level": "高风险",
-     "cond": "v < 0.8 and y1.cfo_inflow/y1.revenue < 0.8"
-    },
-    {
-     "level": "关注",
-     "cond": "v < 1"
-    }
-   ],
-   "basis": "规则:营收现金含量连续2年<0.8=高风险;0.8~1关注;>1良好"
-  },
-  {
-   "id": "m004",
-   "risk_id": "R001",
-   "signal_id": "R001-S02",
-   "signal_name": "应收账款异常膨胀",
-   "name": "应收账款增速差",
-   "unit": "个百分点",
-   "formula": "(y0.ar - y1.ar)/y1.ar*100 - (y0.revenue - y1.revenue)/y1.revenue*100",
-   "rules": [
-    {
-     "level": "高风险",
-     "cond": "v > 30"
-    },
-    {
-     "level": "关注",
-     "cond": "v > 10"
-    }
-   ],
-   "basis": "规则:应收增速差>30个百分点=高风险;10~30=关注"
-  },
-  {
-   "id": "m005",
-   "risk_id": "R001",
-   "signal_id": "R001-S02",
-   "signal_name": "应收账款异常膨胀",
-   "name": "应收账款周转天数",
-   "unit": "天",
-   "formula": "365 / (y0.revenue / avg(y0.ar, y1.ar))",
-   "rules": [
-    {
-     "level": "高风险",
-     "cond": "v - 365/(y1.revenue/avg(y1.ar,y2.ar)) > 30"
-    },
-    {
-     "level": "关注",
-     "cond": "v - 365/(y1.revenue/avg(y1.ar,y2.ar)) > 10"
-    }
-   ],
-   "basis": "规则:周转天数同比增加>30天且高于行业=高风险(行业缺省,同比增幅触发复核);10~30天关注"
-  },
-  {
-   "id": "m006",
-   "risk_id": "R001",
-   "signal_id": "R001-S02",
-   "signal_name": "应收账款异常膨胀",
-   "name": "DSRI",
-   "unit": "倍",
-   "formula": "(y0.ar/y0.revenue) / (y1.ar/y1.revenue)",
-   "rules": [
-    {
-     "level": "高风险",
-     "cond": "v > 1.5"
-    },
-    {
-     "level": "关注",
-     "cond": "v > 1.2"
-    }
-   ],
-   "basis": "规则:DSRI>1.5高风险;1.2~1.5关注;应收营收比两年上升叠加更需警惕"
-  },
-  {
-   "id": "m007",
-   "risk_id": "R001",
-   "signal_id": "R001-S03",
-   "signal_name": "毛利率异常偏高",
-   "name": "本期销售毛利率",
-   "unit": "%",
-   "formula": "(y0.revenue - y0.cost)/y0.revenue*100",
-   "rules": [],
-   "basis": "中间变量:需结合行业对标与毛利率同比/历史判断(交由模型与人工复核)"
-  },
-  {
-   "id": "m008",
-   "risk_id": "R001",
-   "signal_id": "R001-S03",
-   "signal_name": "毛利率异常偏高",
-   "name": "毛利率同比变动",
-   "unit": "个百分点",
-   "formula": "(y0.revenue - y0.cost)/y0.revenue*100 - (y1.revenue - y1.cost)/y1.revenue*100",
-   "rules": [
-    {
-     "level": "关注",
-     "cond": "v > 5"
-    }
-   ],
-   "basis": "规则:毛利率同比上升>5个百分点且无合理商业解释=高风险;机器初筛先标关注,解释核查见第三步"
-  },
-  {
-   "id": "m009",
-   "risk_id": "R001",
-   "signal_id": "R001-S03",
-   "signal_name": "毛利率异常偏高",
-   "name": "GMI",
-   "unit": "倍",
-   "formula": "((y1.revenue - y1.cost)/y1.revenue) / ((y0.revenue - y0.cost)/y0.revenue)",
-   "rules": [
-    {
-     "level": "关注",
-     "cond": "v > 1.2"
-    }
-   ],
-   "basis": "规则:GMI>1.2 关注(上期毛利率高企、本期回落,存在前期虚增毛利动机)"
-  },
-  {
-   "id": "m010",
-   "risk_id": "R001",
-   "signal_id": "R001-S04",
-   "signal_name": "收入增长异常",
-   "name": "SGI",
-   "unit": "倍",
-   "formula": "y0.revenue / y1.revenue",
-   "rules": [
-    {
-     "level": "高风险",
-     "cond": "v > 1.6"
-    },
-    {
-     "level": "关注",
-     "cond": "v > 1.3"
-    }
-   ],
-   "basis": "规则:SGI>1.6高风险;1.3~1.6关注"
-  },
-  {
-   "id": "m011",
-   "risk_id": "R001",
-   "signal_id": "R001-S04",
-   "signal_name": "收入增长异常",
-   "name": "营收净利增速差",
-   "unit": "个百分点",
-   "formula": "(y0.revenue-y1.revenue)/y1.revenue*100 - (y0.net_profit-y1.net_profit)/abs(y1.net_profit)*100",
-   "rules": [
-    {
-     "level": "关注",
-     "cond": "v > 20"
-    }
-   ],
-   "basis": "规则:营收远高于利润增长(增速差>20pct)关注"
-  },
-  {
-   "id": "m012",
-   "risk_id": "R001",
-   "signal_id": "R001-S05",
-   "signal_name": "存货与营收背离",
-   "name": "存货周转率",
-   "unit": "次",
-   "formula": "y0.cost / avg(y0.inventory, y1.inventory)",
-   "rules": [
-    {
-     "level": "高风险",
-     "cond": "v < (y1.cost/avg(y1.inventory,y2.inventory)) * 0.8"
-    },
-    {
-     "level": "关注",
-     "cond": "v < (y1.cost/avg(y1.inventory,y2.inventory)) * 0.9"
-    }
-   ],
-   "basis": "规则:存货周转率同比下降>20%=高风险,10%~20%关注(行业均值缺省时以自身同比替代)"
-  },
-  {
-   "id": "m013",
-   "risk_id": "R001",
-   "signal_id": "R001-S05",
-   "signal_name": "存货与营收背离",
-   "name": "存货增速差",
-   "unit": "个百分点",
-   "formula": "(y0.inventory-y1.inventory)/y1.inventory*100 - (y0.cost-y1.cost)/y1.cost*100",
-   "rules": [
-    {
-     "level": "高风险",
-     "cond": "v > 20"
-    },
-    {
-     "level": "关注",
-     "cond": "v > 10"
-    }
-   ],
-   "basis": "规则:存货增速差>20个百分点高风险;10~20关注"
-  },
-  {
-   "id": "m014",
-   "risk_id": "R001",
-   "signal_id": "R001-S05",
-   "signal_name": "存货与营收背离",
-   "name": "存货营收比",
-   "unit": "%",
-   "formula": "y0.inventory/y0.revenue*100",
-   "rules": [],
-   "basis": "中间变量:存货营收比连续2年上升且高于行业时关注(机器只计算)"
-  },
-  {
-   "id": "m015",
-   "risk_id": "R001",
-   "signal_id": "R001-S06",
-   "signal_name": "应计利润异常",
-   "name": "TATA",
-   "unit": "%",
-   "formula": "(y0.net_profit - y0.cfo_net)/avg(y0.total_assets, y1.total_assets)*100",
-   "rules": [
-    {
-     "level": "高风险",
-     "cond": "v > 10 and (y1.net_profit - y1.cfo_net)/avg(y1.total_assets,y2.total_assets)*100 > 10"
-    },
-    {
-     "level": "关注",
-     "cond": "v > 5"
-    }
-   ],
-   "basis": "规则:TATA连续2年>10%=高风险;>5%且连续上升=关注"
-  },
-  {
-   "id": "m016",
-   "risk_id": "R001",
-   "signal_id": "R001-S06",
-   "signal_name": "应计利润异常",
-   "name": "应计利润占比",
-   "unit": "%",
-   "formula": "(y0.net_profit - y0.cfo_net)/abs(y0.net_profit)*100",
-   "rules": [
-    {
-     "level": "高风险",
-     "cond": "v > 50"
-    },
-    {
-     "level": "关注",
-     "cond": "v > 30"
-    }
-   ],
-   "basis": "规则:应计利润占比>50%高风险;30%~50%关注"
-  },
-  {
-   "id": "m017",
-   "risk_id": "R001",
-   "signal_id": "R001-S08",
-   "signal_name": "期末收入确认异常",
-   "name": "Q4 收入占比",
-   "unit": "%",
-   "formula": "q.q4_rev / y0.revenue * 100",
-   "rules": [
-    {
-     "level": "高风险",
-     "cond": "v > 40"
-    },
-    {
-     "level": "关注",
-     "cond": "v > 30"
-    }
-   ],
-   "basis": "规则:Q4收入占比>40%高风险;30%~40%关注;正常约25%"
-  },
-  {
-   "id": "m018",
-   "risk_id": "R001",
-   "signal_id": "R001-S08",
-   "signal_name": "期末收入确认异常",
-   "name": "Q4 收入环比增速",
-   "unit": "%",
-   "formula": "(q.q4_rev - q.q3_rev)/q.q3_rev*100",
-   "rules": [
-    {
-     "level": "高风险",
-     "cond": "v > 50"
-    },
-    {
-     "level": "关注",
-     "cond": "v > 30"
-    }
-   ],
-   "basis": "规则:Q4环比增速>50%且无合理季节性解释=高风险;30%~50%关注"
-  },
-  {
-   "id": "m019",
-   "risk_id": "R001",
-   "signal_id": "R001-S09",
-   "signal_name": "人均产值与薪酬背离",
-   "name": "员工人数同比增长率",
-   "unit": "%",
-   "formula": "(y0.staff_end - y1.staff_end)/y1.staff_end*100",
-   "rules": [
-    {
-     "level": "高风险",
-     "cond": "(y0.revenue/y0.staff_end)/(y1.revenue/y1.staff_end) - 1 > 0.3 and v < 5"
-    },
-    {
-     "level": "关注",
-     "cond": "(y0.revenue/y0.staff_end)/(y1.revenue/y1.staff_end) - 1 > 0.2 and v < 5"
-    }
-   ],
-   "basis": "规则:人均产值增速>30%但员工增长<5%为高风险;20%~30%且员工增长<5%为关注"
-  },
-  {
-   "id": "m020",
-   "risk_id": "R001",
-   "signal_id": "R001-S09",
-   "signal_name": "人均产值与薪酬背离",
-   "name": "背离指数",
-   "unit": "倍",
-   "formula": "(y0.revenue/y0.staff_end)/(y0.staff_cash_out/y0.staff_end)",
-   "rules": [
-    {
-     "level": "高风险",
-     "cond": "v > 2"
-    },
-    {
-     "level": "关注",
-     "cond": "v > 1.5"
-    }
-   ],
-   "needs_external": true,
-   "basis": "规则口径应为背离指数=(人均产值/行业人均产值)/(人均薪酬/行业人均薪酬);财务科目表无『行业人均产值/行业人均薪酬』字段,以人均产值÷人均薪酬直接近似会严重失真(如高鸿=32倍,行业倍数比口径仅2~3),故不做机算、标『需外部数据』,由大模型结合行业估算并提示人工复核"
-  },
-  {
-   "id": "m021",
-   "risk_id": "R002",
-   "signal_id": "R002-S01",
-   "signal_name": "期末收入确认异常",
-   "name": "Q4收入占比",
-   "unit": "%",
-   "formula": "q.q4_rev / y0.revenue * 100",
-   "rules": [
-    {
-     "level": "高风险",
-     "cond": "v > 40"
-    },
-    {
-     "level": "关注",
-     "cond": "v > 35"
-    }
-   ],
-   "basis": "规则:R002 高风险>40%;关注35%~40%"
-  },
-  {
-   "id": "m022",
-   "risk_id": "R002",
-   "signal_id": "R002-S01",
-   "signal_name": "期末收入确认异常",
-   "name": "下半年收入占比",
-   "unit": "%",
-   "formula": "(q.q3_rev + q.q4_rev)/y0.revenue*100",
-   "rules": [
-    {
-     "level": "高风险",
-     "cond": "v > 60"
-    },
-    {
-     "level": "关注",
-     "cond": "v > 55"
-    }
-   ],
-   "basis": "规则:下半年收入占比>60%高风险;55%~60%关注"
-  },
-  {
-   "id": "m023",
-   "risk_id": "R002",
-   "signal_id": "R002-S08",
-   "signal_name": "毛利率期末异常波动",
-   "name": "Q4毛利率偏离度",
-   "unit": "个百分点",
-   "formula": "((q.q4_rev-q.q4_cost)/q.q4_rev - ((q.q1_rev-q.q1_cost)/q.q1_rev + (q.q2_rev-q.q2_cost)/q.q2_rev + (q.q3_rev-q.q3_cost)/q.q3_rev)/3)*100",
-   "rules": [
-    {
-     "level": "高风险",
-     "cond": "abs(v) > 5"
-    },
-    {
-     "level": "关注",
-     "cond": "abs(v) > 3"
-    }
-   ],
-   "basis": "规则:Q4毛利率偏离前三季均值>5pct(无论高低)高风险;3~5pct关注"
-  },
-  {
-   "id": "m024",
-   "risk_id": "R002",
-   "signal_id": "R002-S02",
-   "signal_name": "应收账款与收入增速背离",
-   "name": "应收账款增速差",
-   "unit": "个百分点",
-   "formula": "(y0.ar-y1.ar)/y1.ar*100 - (y0.revenue-y1.revenue)/y1.revenue*100",
-   "rules": [
-    {
-     "level": "高风险",
-     "cond": "v > 30"
-    },
-    {
-     "level": "关注",
-     "cond": "v > 10"
-    }
-   ],
-   "basis": "规则:应收增速差>30pct高风险;10~30pct关注"
-  },
-  {
-   "id": "m025",
-   "risk_id": "R002",
-   "signal_id": "R002-S04",
-   "signal_name": "合同负债/预收账款异常减少",
-   "name": "合同负债与预收合计同比变动率",
-   "unit": "%",
-   "formula": "(y0.contract_liab + y0.adv_from_customer - y1.contract_liab - y1.adv_from_customer)/(y1.contract_liab + y1.adv_from_customer)*100",
-   "rules": [
-    {
-     "level": "高风险",
-     "cond": "v < -30 and (y0.revenue-y1.revenue)/y1.revenue > 0"
-    },
-    {
-     "level": "关注",
-     "cond": "v < -20"
-    }
-   ],
-   "basis": "规则:合同负债(预收)大降>30%而营收增长=高风险;降15%~25%关注"
-  },
-  {
-   "id": "m026",
-   "risk_id": "R004",
-   "signal_id": "R004-S01",
-   "signal_name": "毛利率异常走高",
-   "name": "毛利率同比变动",
-   "unit": "个百分点",
-   "formula": "(y0.revenue-y0.cost)/y0.revenue*100 - (y1.revenue-y1.cost)/y1.revenue*100",
-   "rules": [
-    {
-     "level": "关注",
-     "cond": "v > 5"
-    }
-   ],
-   "basis": "规则:少计/延迟结转成本→毛利率持续异常走高;>5pct 机器先标关注,第三步解释复核"
-  },
-  {
-   "id": "m027",
-   "risk_id": "R004",
-   "signal_id": "R004-S02",
-   "signal_name": "存货结转与成本不匹配",
-   "name": "存货增速-营业成本增速",
-   "unit": "个百分点",
-   "formula": "(y0.inventory-y1.inventory)/y1.inventory*100 - (y0.cost-y1.cost)/y1.cost*100",
-   "rules": [
-    {
-     "level": "高风险",
-     "cond": "v > 20"
-    },
-    {
-     "level": "关注",
-     "cond": "v > 10"
-    }
-   ],
-   "basis": "规则:存货增速远超营业成本增速,存在少结转成本嫌疑"
-  },
-  {
-   "id": "m028",
-   "risk_id": "R005",
-   "signal_id": "R005-S01",
-   "signal_name": "期间费用率异常下降",
-   "name": "期间费用率(销售+管理+研发)/营收",
-   "unit": "%",
-   "formula": "(y0.sales_expense + y0.admin_expense + y0.rd_expense)/y0.revenue*100",
-   "rules": [
-    {
-     "level": "关注",
-     "cond": "v - (y1.sales_expense + y1.admin_expense + y1.rd_expense)/y1.revenue*100 < -5"
-    }
-   ],
-   "basis": "规则:费用率较历史下降>5pct 且无合理解释为高风险;机器先标关注"
-  },
-  {
-   "id": "m029",
-   "risk_id": "R005",
-   "signal_id": "R005-S02",
-   "signal_name": "费用增速与营收增速背离",
-   "name": "费用-营收增速差(销售费用率弹性)",
-   "unit": "个百分点",
-   "formula": "(y0.sales_expense-y1.sales_expense)/y1.sales_expense*100 - (y0.revenue-y1.revenue)/y1.revenue*100",
-   "rules": [
-    {
-     "level": "高风险",
-     "cond": "v < -20"
-    },
-    {
-     "level": "关注",
-     "cond": "v < -10"
-    }
-   ],
-   "basis": "规则:费用增速远低于营收增速(背离<-20pct,营收扩张而费用不增)高风险;<-10pct关注"
-  },
-  {
-   "id": "m030",
-   "risk_id": "R006",
-   "signal_id": "R006-S02",
-   "signal_name": "研发投入强度异常",
-   "name": "研发费用率同比变动",
-   "unit": "个百分点",
-   "formula": "y0.rd_expense/y0.revenue*100 - y1.rd_expense/y1.revenue*100",
-   "rules": [
-    {
-     "level": "关注",
-     "cond": "v < -5"
-    }
-   ],
-   "basis": "规则:研发投入强度大幅下滑>10pct 且异常为高风险(高企/骤降均复核);机器先标关注"
-  },
-  {
-   "id": "m031",
-   "risk_id": "R007",
-   "signal_id": "R007-S01",
-   "signal_name": "存货余额异常增长、周转率下降",
-   "name": "存货周转天数变动",
-   "unit": "天",
-   "formula": "365/(y0.cost/avg(y0.inventory,y1.inventory)) - 365/(y1.cost/avg(y1.inventory,y2.inventory))",
-   "rules": [
-    {
-     "level": "高风险",
-     "cond": "v > 30"
-    },
-    {
-     "level": "关注",
-     "cond": "v > 15"
-    }
-   ],
-   "basis": "规则:存货周转天数同比增加>30天高风险;15~30天关注"
-  },
-  {
-   "id": "m032",
-   "risk_id": "R008",
-   "signal_id": "R008-S01",
-   "signal_name": "在建工程异常增长",
-   "name": "在建工程增长偏离度",
-   "unit": "个百分点",
-   "formula": "(y0.cip-y1.cip)/y1.cip*100 - (y0.revenue-y1.revenue)/y1.revenue*100",
-   "rules": [
-    {
-     "level": "高风险",
-     "cond": "v > 30"
-    },
-    {
-     "level": "关注",
-     "cond": "v > 10"
-    }
-   ],
-   "basis": "阈值表R008:在建工程增长率-营收增长率 >30pct 高风险;10~30pct 关注"
-  },
-  {
-   "id": "m033",
-   "risk_id": "R008",
-   "signal_id": "R008-S04",
-   "signal_name": "固定资产异常增长",
-   "name": "固定资产增长偏离度",
-   "unit": "个百分点",
-   "formula": "(y0.fixed_assets-y1.fixed_assets)/y1.fixed_assets*100 - (y0.revenue-y1.revenue)/y1.revenue*100",
-   "rules": [
-    {
-     "level": "高风险",
-     "cond": "v > 30"
-    },
-    {
-     "level": "关注",
-     "cond": "v > 10"
-    }
-   ],
-   "basis": "阈值表R008:固定资产增速-营收增速>30pct 高风险;10~30pct 关注(需匹配产能/产量解释)"
-  },
-  {
-   "id": "m034",
-   "risk_id": "R009",
-   "signal_id": "R009-S03",
-   "signal_name": "货币资金与有息负债大存大贷",
-   "name": "有息负债/货币资金",
-   "unit": "倍",
-   "formula": "(y0.st_loan + y0.lt_loan + y0.bond_payable + y0.noncurrent_liab_due)/y0.cash",
-   "rules": [
-    {
-     "level": "高风险",
-     "cond": "v > 3"
-    },
-    {
-     "level": "关注",
-     "cond": "v > 1"
-    }
-   ],
-   "basis": "规则:同时存在较高货币资金与有息负债为关注;资金用途无法解释升级(机器用比值初筛)"
-  },
-  {
-   "id": "m035",
-   "risk_id": "R009",
-   "signal_id": "R009-S01",
-   "signal_name": "货币资金异常增长",
-   "name": "货币资金增速-营收增速",
-   "unit": "个百分点",
-   "formula": "(y0.cash-y1.cash)/y1.cash*100 - (y0.revenue-y1.revenue)/y1.revenue*100",
-   "rules": [
-    {
-     "level": "关注",
-     "cond": "v > 50"
-    }
-   ],
-   "basis": "规则:货币资金大幅异常增长且无法由融资/经营/并购解释=高风险;机器先标关注"
-  },
-  {
-   "id": "m036",
-   "risk_id": "R010",
-   "signal_id": "R010-S01",
-   "signal_name": "商誉规模异常",
-   "name": "商誉/净资产",
-   "unit": "%",
-   "formula": "y0.goodwill/y0.equity_parent*100",
-   "rules": [],
-   "basis": "比例用于筛查不设统一数值(规则库原文);结合并购历史判断,交由复核"
-  },
-  {
-   "id": "m037",
-   "risk_id": "R011",
-   "signal_id": "R011-S01",
-   "signal_name": "应收账款异常增长",
-   "name": "应收账款增速差",
-   "unit": "个百分点",
-   "formula": "(y0.ar-y1.ar)/y1.ar*100 - (y0.revenue-y1.revenue)/y1.revenue*100",
-   "rules": [
-    {
-     "level": "高风险",
-     "cond": "v > 30"
-    },
-    {
-     "level": "关注",
-     "cond": "v > 10"
-    }
-   ],
-   "basis": "规则:应收大幅增长且无信用政策/结算方式解释→升级;增速差>30pct 高风险"
-  },
-  {
-   "id": "m038",
-   "risk_id": "R011",
-   "signal_id": "R011-S04",
-   "signal_name": "坏账准备计提比例异常",
-   "name": "坏账准备/应收账款",
-   "unit": "%",
-   "formula": "y0.bad_allowance/y0.ar*100",
-   "rules": [
-    {
-     "level": "关注",
-     "cond": "v < (y1.bad_allowance/y1.ar*100) - 3"
-    }
-   ],
-   "basis": "规则:账龄恶化背景下计提比例同比下降>3pct 高风险;机器先标关注(需账龄数据复核)"
-  },
-  {
-   "id": "m039",
-   "risk_id": "R013",
-   "signal_id": "R013-S02",
-   "signal_name": "其他应收款异常增长/大额挂账",
-   "name": "其他应收款占总资产比",
-   "unit": "%",
-   "formula": "y0.other_receivable/y0.total_assets*100",
-   "rules": [
-    {
-     "level": "关注",
-     "cond": "v > 5"
-    }
-   ],
-   "basis": "规则:其他应收款占总资产>5%触发关注;同比大幅异常增加叠加更可疑"
-  },
-  {
-   "id": "m040",
-   "risk_id": "R013",
-   "signal_id": "R013-S01",
-   "signal_name": "预付款项异常增长/长期挂账",
-   "name": "预付款项同比增速",
-   "unit": "%",
-   "formula": "(y0.adv_receipt-y1.adv_receipt)/y1.adv_receipt*100",
-   "rules": [
-    {
-     "level": "关注",
-     "cond": "v > 100"
-    }
-   ],
-   "basis": "规则:预付款项增长率同比大幅飙升触发关注(需结合资金流向核查)"
-  },
-  {
-   "id": "m041",
-   "risk_id": "R013",
-   "signal_id": "R013-S04",
-   "signal_name": "货币资金与有息负债大存大贷",
-   "name": "有息负债/货币资金",
-   "unit": "倍",
-   "formula": "(y0.st_loan + y0.lt_loan + y0.bond_payable + y0.noncurrent_liab_due)/y0.cash",
-   "rules": [
-    {
-     "level": "高风险",
-     "cond": "v > 3"
-    },
-    {
-     "level": "关注",
-     "cond": "v > 1"
-    }
-   ],
-   "basis": "规则:有息负债远高于账面货币资金且利息收入低于活期收益→关注资金占用"
-  },
-  {
-   "id": "m042",
-   "risk_id": "R003",
-   "signal_id": "R003-S01",
-   "signal_name": "扣非与净利润增速背离",
-   "name": "净利润增速-扣非净利润增速",
-   "unit": "个百分点",
-   "formula": "(y0.net_profit-y1.net_profit)/abs(y1.net_profit)*100 - (y0.deduct_profit-y1.deduct_profit)/abs(y1.deduct_profit)*100",
-   "rules": [
-    {
-     "level": "高风险",
-     "cond": "v > 30"
-    },
-    {
-     "level": "关注",
-     "cond": "v > 10"
-    }
-   ],
-   "basis": "规则:非经常性损益驱动利润,扣非增速远低于净利增速(差>30pct)需警惕虚增非经常性损益"
-  },
-  {
-   "id": "m043",
-   "risk_id": "R012",
-   "signal_id": "R012-S03",
-   "signal_name": "对陌生第三方营收占比偏高",
-   "name": "前五大客户集中度CR5",
-   "unit": "%",
-   "formula": "extra.top5_customer_ratio",
-   "rules": [
-    {
-     "level": "关注",
-     "cond": "v > 70"
-    }
-   ],
-   "basis": "规则:CR5>70%且客户集中度持续上升=关注(需核查客户背景与新增主体)"
-  },
-  {
-   "id": "m044",
-   "risk_id": "R001",
-   "signal_id": "R001-S02",
-   "signal_name": "应收账款异常膨胀",
-   "name": "应收账款同比增长率",
-   "unit": "%",
-   "formula": "(y0.ar-y1.ar)/y1.ar*100",
-   "rules": [],
-   "basis": "中间变量:配合应收增速差与营收增速判断,交由大模型与人工复核"
-  },
-  {
-   "id": "m045",
-   "risk_id": "R001",
-   "signal_id": "R001-S02",
-   "signal_name": "应收账款异常膨胀",
-   "name": "营业收入同比增长率",
-   "unit": "%",
-   "formula": "(y0.revenue-y1.revenue)/y1.revenue*100",
-   "rules": [],
-   "basis": "中间变量:增速的合理性/行业偏离由大模型+人工判断"
-  },
-  {
-   "id": "m046",
-   "risk_id": "R001",
-   "signal_id": "R001-S02",
-   "signal_name": "应收账款异常膨胀",
-   "name": "应收账款营收比",
-   "unit": "%",
-   "formula": "y0.ar/y0.revenue*100",
-   "rules": [
-    {
-     "level": "关注",
-     "cond": "v > 30"
-    }
-   ],
-   "basis": "规则:应收营收比>30%且连续上升更可疑;机器以单年>30%标关注,连续趋势由大模型+人工复核"
-  },
-  {
-   "id": "m047",
-   "risk_id": "R001",
-   "signal_id": "R001-S02",
-   "signal_name": "应收账款异常膨胀",
-   "name": "平均应收账款余额",
-   "unit": "万元",
-   "formula": "avg(y0.ar,y1.ar)",
-   "rules": [],
-   "basis": "中间变量"
-  },
-  {
-   "id": "m048",
-   "risk_id": "R001",
-   "signal_id": "R001-S02",
-   "signal_name": "应收账款异常膨胀",
-   "name": "应收账款周转率",
-   "unit": "次",
-   "formula": "y0.revenue/avg(y0.ar,y1.ar)",
-   "rules": [],
-   "basis": "中间变量:周转率同比降幅>20%的风险已由『应收账款周转天数』同比判定覆盖"
-  },
-  {
-   "id": "m049",
-   "risk_id": "R001",
-   "signal_id": "R001-S04",
-   "signal_name": "收入增长异常",
-   "name": "营业收入同比增长率",
-   "unit": "%",
-   "formula": "(y0.revenue-y1.revenue)/y1.revenue*100",
-   "rules": [],
-   "basis": "中间变量:增速的行业偏离(SGI/行业对比)由大模型+人工判断"
-  },
-  {
-   "id": "m050",
-   "risk_id": "R001",
-   "signal_id": "R001-S05",
-   "signal_name": "存货与营收背离",
-   "name": "存货周转天数",
-   "unit": "天",
-   "formula": "365/(y0.cost/avg(y0.inventory,y1.inventory))",
-   "rules": [],
-   "basis": "中间变量:天数激增/成本结转不足由存货增速差与周转率同比预警"
-  },
-  {
-   "id": "m051",
-   "risk_id": "R001",
-   "signal_id": "R001-S05",
-   "signal_name": "存货与营收背离",
-   "name": "存货同比增长率",
-   "unit": "%",
-   "formula": "(y0.inventory-y1.inventory)/y1.inventory*100",
-   "rules": [],
-   "basis": "中间变量"
-  },
-  {
-   "id": "m052",
-   "risk_id": "R001",
-   "signal_id": "R001-S05",
-   "signal_name": "存货与营收背离",
-   "name": "营业成本同比增长率",
-   "unit": "%",
-   "formula": "(y0.cost-y1.cost)/y1.cost*100",
-   "rules": [],
-   "basis": "中间变量"
-  },
-  {
-   "id": "m053",
-   "risk_id": "R001",
-   "signal_id": "R001-S06",
-   "signal_name": "应计利润异常",
-   "name": "平均总资产",
-   "unit": "万元",
-   "formula": "avg(y0.total_assets,y1.total_assets)",
-   "rules": [],
-   "basis": "中间变量"
-  },
-  {
-   "id": "m054",
-   "risk_id": "R001",
-   "signal_id": "R001-S09",
-   "signal_name": "人均产值与薪酬背离",
-   "name": "人均产值",
-   "unit": "万元/人",
-   "formula": "y0.revenue/y0.staff_end",
-   "rules": [],
-   "basis": "中间变量:是否显著高于行业(如高鸿2021约673万/人)需行业对比,机器无行业库不判级,由大模型+人工判断"
-  },
-  {
-   "id": "m055",
-   "risk_id": "R001",
-   "signal_id": "R001-S09",
-   "signal_name": "人均产值与薪酬背离",
-   "name": "人均薪酬",
-   "unit": "万元/人",
-   "formula": "y0.staff_cash_out/y0.staff_end",
-   "rules": [],
-   "basis": "中间变量"
-  },
-  {
-   "id": "m056",
-   "risk_id": "R001",
-   "signal_id": "R001-S03",
-   "signal_name": "毛利率异常偏高",
-   "name": "上期销售毛利率",
-   "unit": "%",
-   "formula": "(y1.revenue-y1.cost)/y1.revenue*100",
-   "rules": [],
-   "basis": "中间变量:用于毛利率同比与 GMI 的口径对照,风险判断交大模型+人工"
-  },
-  {
-   "id": "m057",
-   "risk_id": "R001",
-   "signal_id": "R001-S03",
-   "signal_name": "毛利率异常偏高",
-   "name": "Q4 毛利率环比变动",
-   "unit": "个百分点",
-   "formula": "((q.q4_rev-q.q4_cost)/q.q4_rev*100-(q.q3_rev-q.q3_cost)/q.q3_rev*100)",
-   "rules": [
-    {
-     "level": "高风险",
-     "cond": "v > 5"
-    },
-    {
-     "level": "关注",
-     "cond": "v > 3"
-    }
-   ],
-   "basis": "规则:Q4毛利率较Q3突增>5pp高风险、3~5pp关注(需分季度成本数据)"
-  },
-  {
-   "id": "m058",
-   "risk_id": "R001",
-   "signal_id": "R001-S03",
-   "signal_name": "毛利率异常偏高",
-   "name": "毛利率行业偏离度",
-   "unit": "",
-   "formula": "",
-   "rules": [],
-   "needs_external": true,
-   "basis": "需行业平均销售毛利率(外部行业数据);机器无行业库,不近似机算,交大模型结合行业估算+人工复核"
-  },
-  {
-   "id": "m059",
-   "risk_id": "R001",
-   "signal_id": "R001-S03",
-   "signal_name": "毛利率异常偏高",
-   "name": "单季销售毛利率",
-   "unit": "",
-   "formula": "",
-   "rules": [],
-   "needs_external": true,
-   "basis": "规则为单季口径,需 Q1~Q4 逐季毛利率;机器以年度毛利率与 Q4 环比近似覆盖,逐季明细交大模型计算"
-  },
-  {
-   "id": "m060",
-   "risk_id": "R001",
-   "signal_id": "R001-S04",
-   "signal_name": "收入增长异常",
-   "name": "净利润同比增长率",
-   "unit": "%",
-   "formula": "(y0.net_profit-y1.net_profit)/abs(y1.net_profit)*100",
-   "rules": [],
-   "basis": "中间变量:上年亏损/扭亏时按绝对值口径,仅展示,判断交大模型+人工"
-  },
-  {
-   "id": "m061",
-   "risk_id": "R001",
-   "signal_id": "R001-S04",
-   "signal_name": "收入增长异常",
-   "name": "行业平均营业收入增长率",
-   "unit": "",
-   "formula": "",
-   "rules": [],
-   "needs_external": true,
-   "basis": "需同行业可比公司营收增速中位数(外部行业数据),交大模型结合行业估算+人工复核"
-  },
-  {
-   "id": "m062",
-   "risk_id": "R001",
-   "signal_id": "R001-S04",
-   "signal_name": "收入增长异常",
-   "name": "营收增长行业偏离",
-   "unit": "",
-   "formula": "",
-   "rules": [],
-   "needs_external": true,
-   "basis": "需行业平均营收增速(外部数据);无行业库不机算,交大模型+人工"
-  },
-  {
-   "id": "m063",
-   "risk_id": "R001",
-   "signal_id": "R001-S04",
-   "signal_name": "收入增长异常",
-   "name": "营业收入三年 CAGR",
-   "unit": "",
-   "formula": "",
-   "rules": [],
-   "needs_external": true,
-   "basis": "需三年前(审计年度-3)营业收入,数据模型仅存 Y0/Y1/Y2;交大模型结合可得历史+人工"
-  },
-  {
-   "id": "m064",
-   "risk_id": "R001",
-   "signal_id": "R001-S05",
-   "signal_name": "存货与营收背离",
-   "name": "平均存货余额",
-   "unit": "万元",
-   "formula": "avg(y0.inventory,y1.inventory)",
-   "rules": [],
-   "basis": "中间变量"
-  },
-  {
-   "id": "m065",
-   "risk_id": "R001",
-   "signal_id": "R001-S05",
-   "signal_name": "存货与营收背离",
-   "name": "存货周转率同比变动",
-   "unit": "次",
-   "formula": "y0.cost/avg(y0.inventory,y1.inventory) - y1.cost/avg(y1.inventory,y2.inventory)",
-   "rules": [],
-   "basis": "中间变量:同比降幅>20%的风险已由『存货周转率』同比判定覆盖(该指标需 Y2 数据)"
-  },
-  {
-   "id": "m066",
-   "risk_id": "R001",
-   "signal_id": "R001-S06",
-   "signal_name": "应计利润异常",
-   "name": "本期营运资本",
-   "unit": "万元",
-   "formula": "y0.current_assets-y0.current_liab",
-   "rules": [],
-   "basis": "中间变量"
-  },
-  {
-   "id": "m067",
-   "risk_id": "R001",
-   "signal_id": "R001-S06",
-   "signal_name": "应计利润异常",
-   "name": "上期营运资本",
-   "unit": "万元",
-   "formula": "y1.current_assets-y1.current_liab",
-   "rules": [],
-   "basis": "中间变量"
-  },
-  {
-   "id": "m068",
-   "risk_id": "R001",
-   "signal_id": "R001-S06",
-   "signal_name": "应计利润异常",
-   "name": "营运资本增加额",
-   "unit": "万元",
-   "formula": "(y0.current_assets-y0.current_liab)-(y1.current_assets-y1.current_liab)",
-   "rules": [],
-   "basis": "中间变量"
-  },
-  {
-   "id": "m069",
-   "risk_id": "R001",
-   "signal_id": "R001-S06",
-   "signal_name": "应计利润异常",
-   "name": "营运资本应计率",
-   "unit": "%",
-   "formula": "((y0.current_assets-y0.current_liab)-(y1.current_assets-y1.current_liab))/avg(y0.total_assets,y1.total_assets)*100",
-   "rules": [
-    {
-     "level": "关注",
-     "cond": "v > 8"
-    }
-   ],
-   "basis": "规则:营运资本应计率连续2年>8%=高风险;机器单年>8%标关注,连续两年由大模型+人工复核"
-  },
-  {
-   "id": "m070",
-   "risk_id": "R001",
-   "signal_id": "R001-S07",
-   "signal_name": "客户与交易结构异常",
-   "name": "CR5",
-   "unit": "%",
-   "formula": "extra.top5_customer_ratio",
-   "rules": [
-    {
-     "level": "关注",
-     "cond": "v > 70"
-    }
-   ],
-   "basis": "规则:CR5>70%且集中度持续上升=关注;机器单年>70%标关注,持续趋势由大模型+人工"
-  },
-  {
-   "id": "m071",
-   "risk_id": "R001",
-   "signal_id": "R001-S07",
-   "signal_name": "客户与交易结构异常",
-   "name": "CR1",
-   "unit": "%",
-   "formula": "extra.top1_customer_ratio",
-   "rules": [
-    {
-     "level": "关注",
-     "cond": "v > 30"
-    }
-   ],
-   "basis": "规则:CR1>30%且为新增大客户=高风险;机器单年>30%标关注(是否新增需客户名单文本,交大模型+人工)"
-  },
-  {
-   "id": "m072",
-   "risk_id": "R001",
-   "signal_id": "R001-S07",
-   "signal_name": "客户与交易结构异常",
-   "name": "关联方销售占比",
-   "unit": "%",
-   "formula": "extra.related_sales_ratio",
-   "rules": [
-    {
-     "level": "高风险",
-     "cond": "v > 20"
-    }
-   ],
-   "basis": "规则:关联方销售占比>20%=高风险"
-  },
-  {
-   "id": "m073",
-   "risk_id": "R001",
-   "signal_id": "R001-S07",
-   "signal_name": "客户与交易结构异常",
-   "name": "前五大客户销售额合计",
-   "unit": "",
-   "formula": "",
-   "rules": [],
-   "needs_external": true,
-   "basis": "需年报『前五大客户』销售额明细文本(extra 仅存占比),交大模型从原文提取+人工"
-  },
-  {
-   "id": "m074",
-   "risk_id": "R001",
-   "signal_id": "R001-S07",
-   "signal_name": "客户与交易结构异常",
-   "name": "新增客户销售额",
-   "unit": "",
-   "formula": "",
-   "rules": [],
-   "needs_external": true,
-   "basis": "需本年与上年客户名单对比(年报文本),交大模型+人工"
-  },
-  {
-   "id": "m075",
-   "risk_id": "R001",
-   "signal_id": "R001-S07",
-   "signal_name": "客户与交易结构异常",
-   "name": "新增客户销售额占比",
-   "unit": "",
-   "formula": "",
-   "rules": [],
-   "needs_external": true,
-   "basis": "需两年客户名单(年报文本),交大模型+人工"
-  },
-  {
-   "id": "m076",
-   "risk_id": "R001",
-   "signal_id": "R001-S07",
-   "signal_name": "客户与交易结构异常",
-   "name": "客户供应商重叠数",
-   "unit": "",
-   "formula": "",
-   "rules": [],
-   "needs_external": true,
-   "basis": "需客户与供应商名单(年报文本),交大模型+人工"
-  },
-  {
-   "id": "m077",
-   "risk_id": "R001",
-   "signal_id": "R001-S08",
-   "signal_name": "期末收入确认异常",
-   "name": "Q4 营业收入",
-   "unit": "万元",
-   "formula": "q.q4_rev",
-   "rules": [],
-   "basis": "中间变量:未直接披露时由全年减前三季推算(抽取端已处理)"
-  },
-  {
-   "id": "m078",
-   "risk_id": "R001",
-   "signal_id": "R001-S08",
-   "signal_name": "期末收入确认异常",
-   "name": "Q3 营业收入",
-   "unit": "万元",
-   "formula": "q.q3_rev",
-   "rules": [],
-   "basis": "中间变量"
-  },
-  {
-   "id": "m079",
-   "risk_id": "R001",
-   "signal_id": "R001-S08",
-   "signal_name": "期末收入确认异常",
-   "name": "次年 Q1 收入回落率",
-   "unit": "%",
-   "formula": "(q.next_q1_rev-q.q4_rev)/q.q4_rev*100",
-   "rules": [
-    {
-     "level": "高风险",
-     "cond": "v < -30"
-    }
-   ],
-   "basis": "规则:次年Q1收入较当年Q4回落>30%=高风险(需次年Q1数据)"
-  },
-  {
-   "id": "m080",
-   "risk_id": "R001",
-   "signal_id": "R001-S08",
-   "signal_name": "期末收入确认异常",
-   "name": "历史 Q4 收入占比均值",
-   "unit": "",
-   "formula": "",
-   "rules": [],
-   "needs_external": true,
-   "basis": "需前三年(2018-2020)分季度收入(历史数据),数据模型仅存当期季度"
-  },
-  {
-   "id": "m081",
-   "risk_id": "R001",
-   "signal_id": "R001-S08",
-   "signal_name": "期末收入确认异常",
-   "name": "Q4 收入占比偏离度",
-   "unit": "",
-   "formula": "",
-   "rules": [],
-   "needs_external": true,
-   "basis": "依赖『历史 Q4 收入占比均值』,需多年分季度数据(历史数据)"
-  },
-  {
-   "id": "m082",
-   "risk_id": "R001",
-   "signal_id": "R001-S09",
-   "signal_name": "人均产值与薪酬背离",
-   "name": "人均产值同比增长率",
-   "unit": "%",
-   "formula": "((y0.revenue/y0.staff_end)/(y1.revenue/y1.staff_end)-1)*100",
-   "rules": [],
-   "basis": "中间变量:配合『员工人数同比增长率』判断(需上年员工数),风险由大模型+人工"
-  },
-  {
-   "id": "m083",
-   "risk_id": "R001",
-   "signal_id": "R001-S09",
-   "signal_name": "人均产值与薪酬背离",
-   "name": "人均产值行业倍数",
-   "unit": "",
-   "formula": "",
-   "rules": [],
-   "needs_external": true,
-   "basis": "需行业人均产值(外部行业数据);无行业库不机算,交大模型估算+人工复核"
-  },
-  {
-   "id": "m084",
-   "risk_id": "R001",
-   "signal_id": "R001-S09",
-   "signal_name": "人均产值与薪酬背离",
-   "name": "人均薪酬行业倍数",
-   "unit": "",
-   "formula": "",
-   "rules": [],
-   "needs_external": true,
-   "basis": "需行业人均薪酬(外部行业数据);无行业库不机算,交大模型估算+人工复核"
-  }
- ]
+    "note":  "机器可算核心指标(数值硬规则初筛)。level 判定依据《规则库》阈值文本;凡阈值要求\u0027连续N年\u0027用 y0/y1(/y2)判断;要求\u0027结合行业/无合理解释\u0027的,机器只负责计算与异常筛查(给出关注),是否构成风险由大模型/人工在第三步复核。金额单位万元。percent 均按数值(40=40%)。",
+    "metrics":  [
+                    {
+                        "id":  "m001",
+                        "risk_id":  "R001",
+                        "signal_id":  "R001-S01",
+                        "signal_name":  "收入现金流背离",
+                        "name":  "净现比",
+                        "unit":  "倍",
+                        "formula":  "y0.cfo_net / y0.net_profit",
+                        "rules":  [
+                                      {
+                                          "level":  "高风险",
+                                          "cond":  "y0.cfo_net \u003c= 0 or (y0.cfo_net \u003c 0.5*y0.net_profit and y1.cfo_net \u003c 0.5*y1.net_profit)"
+                                      },
+                                      {
+                                          "level":  "关注",
+                                          "cond":  "v \u003c 1"
+                                      }
+                                  ],
+                        "basis":  "规则:高风险=净现比连续2年\u003c0.5或任意一年为负;关注=0.5~1;正常\u003e1"
+                    },
+                    {
+                        "id":  "m002",
+                        "risk_id":  "R001",
+                        "signal_id":  "R001-S01",
+                        "signal_name":  "收入现金流背离",
+                        "name":  "收现比",
+                        "unit":  "倍",
+                        "formula":  "y0.sales_cash_in / y0.revenue",
+                        "rules":  [
+                                      {
+                                          "level":  "高风险",
+                                          "cond":  "v \u003c 1 and y0.sales_cash_in/y0.revenue \u003c y1.sales_cash_in/y1.revenue and y1.sales_cash_in/y1.revenue \u003c y2.sales_cash_in/y2.revenue"
+                                      },
+                                      {
+                                          "level":  "关注",
+                                          "cond":  "v \u003c 1"
+                                      }
+                                  ],
+                        "basis":  "规则:收现比\u003c1且连续2年下降=高风险;\u003c1但稳定=关注;≥1正常"
+                    },
+                    {
+                        "id":  "m003",
+                        "risk_id":  "R001",
+                        "signal_id":  "R001-S01",
+                        "signal_name":  "收入现金流背离",
+                        "name":  "营收现金含量",
+                        "unit":  "倍",
+                        "formula":  "y0.cfo_inflow / y0.revenue",
+                        "rules":  [
+                                      {
+                                          "level":  "高风险",
+                                          "cond":  "v \u003c 0.8 and y1.cfo_inflow/y1.revenue \u003c 0.8"
+                                      },
+                                      {
+                                          "level":  "关注",
+                                          "cond":  "v \u003c 1"
+                                      }
+                                  ],
+                        "basis":  "规则:营收现金含量连续2年\u003c0.8=高风险;0.8~1关注;\u003e1良好"
+                    },
+                    {
+                        "id":  "m004",
+                        "risk_id":  "R001",
+                        "signal_id":  "R001-S02",
+                        "signal_name":  "应收账款异常膨胀",
+                        "name":  "应收账款增速差",
+                        "unit":  "个百分点",
+                        "formula":  "(y0.ar - y1.ar)/y1.ar*100 - (y0.revenue - y1.revenue)/y1.revenue*100",
+                        "rules":  [
+                                      {
+                                          "level":  "高风险",
+                                          "cond":  "v \u003e 30"
+                                      },
+                                      {
+                                          "level":  "关注",
+                                          "cond":  "v \u003e 10"
+                                      }
+                                  ],
+                        "basis":  "规则:应收增速差\u003e30个百分点=高风险;10~30=关注"
+                    },
+                    {
+                        "id":  "m005",
+                        "risk_id":  "R001",
+                        "signal_id":  "R001-S02",
+                        "signal_name":  "应收账款异常膨胀",
+                        "name":  "应收账款周转天数",
+                        "unit":  "天",
+                        "formula":  "365 / (y0.revenue / avg(y0.ar, y1.ar))",
+                        "rules":  [
+                                      {
+                                          "level":  "高风险",
+                                          "cond":  "v - 365/(y1.revenue/avg(y1.ar,y2.ar)) \u003e 30"
+                                      },
+                                      {
+                                          "level":  "关注",
+                                          "cond":  "v - 365/(y1.revenue/avg(y1.ar,y2.ar)) \u003e 10"
+                                      }
+                                  ],
+                        "basis":  "规则:周转天数同比增加\u003e30天且高于行业=高风险(行业缺省,同比增幅触发复核);10~30天关注"
+                    },
+                    {
+                        "id":  "m006",
+                        "risk_id":  "R001",
+                        "signal_id":  "R001-S02",
+                        "signal_name":  "应收账款异常膨胀",
+                        "name":  "DSRI",
+                        "unit":  "倍",
+                        "formula":  "(y0.ar/y0.revenue) / (y1.ar/y1.revenue)",
+                        "rules":  [
+                                      {
+                                          "level":  "高风险",
+                                          "cond":  "v \u003e 1.5"
+                                      },
+                                      {
+                                          "level":  "关注",
+                                          "cond":  "v \u003e 1.2"
+                                      }
+                                  ],
+                        "basis":  "规则:DSRI\u003e1.5高风险;1.2~1.5关注;应收营收比两年上升叠加更需警惕"
+                    },
+                    {
+                        "id":  "m007",
+                        "risk_id":  "R001",
+                        "signal_id":  "R001-S03",
+                        "signal_name":  "毛利率异常偏高",
+                        "name":  "本期销售毛利率",
+                        "unit":  "%",
+                        "formula":  "(y0.revenue - y0.cost)/y0.revenue*100",
+                        "rules":  [
+
+                                  ],
+                        "basis":  "中间变量:需结合行业对标与毛利率同比/历史判断(交由模型与人工复核)"
+                    },
+                    {
+                        "id":  "m008",
+                        "risk_id":  "R001",
+                        "signal_id":  "R001-S03",
+                        "signal_name":  "毛利率异常偏高",
+                        "name":  "毛利率同比变动",
+                        "unit":  "个百分点",
+                        "formula":  "(y0.revenue - y0.cost)/y0.revenue*100 - (y1.revenue - y1.cost)/y1.revenue*100",
+                        "rules":  [
+                                      {
+                                          "level":  "关注",
+                                          "cond":  "v \u003e 5"
+                                      }
+                                  ],
+                        "basis":  "规则:毛利率同比上升\u003e5个百分点且无合理商业解释=高风险;机器初筛先标关注,解释核查见第三步"
+                    },
+                    {
+                        "id":  "m009",
+                        "risk_id":  "R001",
+                        "signal_id":  "R001-S03",
+                        "signal_name":  "毛利率异常偏高",
+                        "name":  "GMI",
+                        "unit":  "倍",
+                        "formula":  "((y1.revenue - y1.cost)/y1.revenue) / ((y0.revenue - y0.cost)/y0.revenue)",
+                        "rules":  [
+                                      {
+                                          "level":  "关注",
+                                          "cond":  "v \u003e 1.2"
+                                      }
+                                  ],
+                        "basis":  "规则:GMI\u003e1.2 关注(上期毛利率高企、本期回落,存在前期虚增毛利动机)"
+                    },
+                    {
+                        "id":  "m010",
+                        "risk_id":  "R001",
+                        "signal_id":  "R001-S04",
+                        "signal_name":  "收入增长异常",
+                        "name":  "SGI",
+                        "unit":  "倍",
+                        "formula":  "y0.revenue / y1.revenue",
+                        "rules":  [
+                                      {
+                                          "level":  "高风险",
+                                          "cond":  "v \u003e 1.6"
+                                      },
+                                      {
+                                          "level":  "关注",
+                                          "cond":  "v \u003e 1.3"
+                                      }
+                                  ],
+                        "basis":  "规则:SGI\u003e1.6高风险;1.3~1.6关注"
+                    },
+                    {
+                        "id":  "m011",
+                        "risk_id":  "R001",
+                        "signal_id":  "R001-S04",
+                        "signal_name":  "收入增长异常",
+                        "name":  "营收净利增速差",
+                        "unit":  "个百分点",
+                        "formula":  "(y0.revenue-y1.revenue)/y1.revenue*100 - (y0.net_profit-y1.net_profit)/abs(y1.net_profit)*100",
+                        "rules":  [
+                                      {
+                                          "level":  "关注",
+                                          "cond":  "v \u003e 20"
+                                      }
+                                  ],
+                        "basis":  "规则:营收远高于利润增长(增速差\u003e20pct)关注"
+                    },
+                    {
+                        "id":  "m012",
+                        "risk_id":  "R001",
+                        "signal_id":  "R001-S05",
+                        "signal_name":  "存货与营收背离",
+                        "name":  "存货周转率",
+                        "unit":  "次",
+                        "formula":  "y0.cost / avg(y0.inventory, y1.inventory)",
+                        "rules":  [
+                                      {
+                                          "level":  "高风险",
+                                          "cond":  "v \u003c (y1.cost/avg(y1.inventory,y2.inventory)) * 0.8"
+                                      },
+                                      {
+                                          "level":  "关注",
+                                          "cond":  "v \u003c (y1.cost/avg(y1.inventory,y2.inventory)) * 0.9"
+                                      }
+                                  ],
+                        "basis":  "规则:存货周转率同比下降\u003e20%=高风险,10%~20%关注(行业均值缺省时以自身同比替代)"
+                    },
+                    {
+                        "id":  "m013",
+                        "risk_id":  "R001",
+                        "signal_id":  "R001-S05",
+                        "signal_name":  "存货与营收背离",
+                        "name":  "存货增速差",
+                        "unit":  "个百分点",
+                        "formula":  "(y0.inventory-y1.inventory)/y1.inventory*100 - (y0.cost-y1.cost)/y1.cost*100",
+                        "rules":  [
+                                      {
+                                          "level":  "高风险",
+                                          "cond":  "v \u003e 20"
+                                      },
+                                      {
+                                          "level":  "关注",
+                                          "cond":  "v \u003e 10"
+                                      }
+                                  ],
+                        "basis":  "规则:存货增速差\u003e20个百分点高风险;10~20关注"
+                    },
+                    {
+                        "id":  "m014",
+                        "risk_id":  "R001",
+                        "signal_id":  "R001-S05",
+                        "signal_name":  "存货与营收背离",
+                        "name":  "存货营收比",
+                        "unit":  "%",
+                        "formula":  "y0.inventory/y0.revenue*100",
+                        "rules":  [
+
+                                  ],
+                        "basis":  "中间变量:存货营收比连续2年上升且高于行业时关注(机器只计算)"
+                    },
+                    {
+                        "id":  "m015",
+                        "risk_id":  "R001",
+                        "signal_id":  "R001-S06",
+                        "signal_name":  "应计利润异常",
+                        "name":  "TATA",
+                        "unit":  "%",
+                        "formula":  "(y0.net_profit - y0.cfo_net)/avg(y0.total_assets, y1.total_assets)*100",
+                        "rules":  [
+                                      {
+                                          "level":  "高风险",
+                                          "cond":  "v \u003e 10 and (y1.net_profit - y1.cfo_net)/avg(y1.total_assets,y2.total_assets)*100 \u003e 10"
+                                      },
+                                      {
+                                          "level":  "关注",
+                                          "cond":  "v \u003e 5"
+                                      }
+                                  ],
+                        "basis":  "规则:TATA连续2年\u003e10%=高风险;\u003e5%且连续上升=关注"
+                    },
+                    {
+                        "id":  "m016",
+                        "risk_id":  "R001",
+                        "signal_id":  "R001-S06",
+                        "signal_name":  "应计利润异常",
+                        "name":  "应计利润占比",
+                        "unit":  "%",
+                        "formula":  "(y0.net_profit - y0.cfo_net)/abs(y0.net_profit)*100",
+                        "rules":  [
+                                      {
+                                          "level":  "高风险",
+                                          "cond":  "v \u003e 50"
+                                      },
+                                      {
+                                          "level":  "关注",
+                                          "cond":  "v \u003e 30"
+                                      }
+                                  ],
+                        "basis":  "规则:应计利润占比\u003e50%高风险;30%~50%关注"
+                    },
+                    {
+                        "id":  "m017",
+                        "risk_id":  "R001",
+                        "signal_id":  "R001-S08",
+                        "signal_name":  "期末收入确认异常",
+                        "name":  "Q4 收入占比",
+                        "unit":  "%",
+                        "formula":  "q.q4_rev / y0.revenue * 100",
+                        "rules":  [
+                                      {
+                                          "level":  "高风险",
+                                          "cond":  "v \u003e 40"
+                                      },
+                                      {
+                                          "level":  "关注",
+                                          "cond":  "v \u003e 30"
+                                      }
+                                  ],
+                        "basis":  "规则:Q4收入占比\u003e40%高风险;30%~40%关注;正常约25%"
+                    },
+                    {
+                        "id":  "m018",
+                        "risk_id":  "R001",
+                        "signal_id":  "R001-S08",
+                        "signal_name":  "期末收入确认异常",
+                        "name":  "Q4 收入环比增速",
+                        "unit":  "%",
+                        "formula":  "(q.q4_rev - q.q3_rev)/q.q3_rev*100",
+                        "rules":  [
+                                      {
+                                          "level":  "高风险",
+                                          "cond":  "v \u003e 50"
+                                      },
+                                      {
+                                          "level":  "关注",
+                                          "cond":  "v \u003e 30"
+                                      }
+                                  ],
+                        "basis":  "规则:Q4环比增速\u003e50%且无合理季节性解释=高风险;30%~50%关注"
+                    },
+                    {
+                        "id":  "m019",
+                        "risk_id":  "R001",
+                        "signal_id":  "R001-S09",
+                        "signal_name":  "人均产值与薪酬背离",
+                        "name":  "员工人数同比增长率",
+                        "unit":  "%",
+                        "formula":  "(y0.staff_end - y1.staff_end)/y1.staff_end*100",
+                        "rules":  [
+                                      {
+                                          "level":  "高风险",
+                                          "cond":  "(y0.revenue/y0.staff_end)/(y1.revenue/y1.staff_end) - 1 \u003e 0.3 and v \u003c 5"
+                                      },
+                                      {
+                                          "level":  "关注",
+                                          "cond":  "(y0.revenue/y0.staff_end)/(y1.revenue/y1.staff_end) - 1 \u003e 0.2 and v \u003c 5"
+                                      }
+                                  ],
+                        "basis":  "规则:人均产值增速\u003e30%但员工增长\u003c5%为高风险;20%~30%且员工增长\u003c5%为关注"
+                    },
+                    {
+                        "id":  "m020",
+                        "risk_id":  "R001",
+                        "signal_id":  "R001-S09",
+                        "signal_name":  "人均产值与薪酬背离",
+                        "name":  "背离指数",
+                        "unit":  "倍",
+                        "formula":  "((y0.revenue/y0.staff_end)/extra.ind_per_capita_output)/((y0.staff_cash_out/y0.staff_end)/extra.ind_per_capita_pay)",
+                        "rules":  [
+                                      {
+                                          "level":  "高风险",
+                                          "cond":  "v \u003e 2"
+                                      },
+                                      {
+                                          "level":  "关注",
+                                          "cond":  "v \u003e 1.5"
+                                      }
+                                  ],
+                        "requires_extra":  [
+                                               "ind_per_capita_output",
+                                               "ind_per_capita_pay"
+                                           ],
+
+                        "basis":  "背离指数=(人均产值/行业人均产值)/(人均薪酬/行业人均薪酬),行业人均产值/薪酬取自行业基准表(②页可人工录入覆盖,默认值仅示意、来源口径须人工核对);>2倍高风险、>1.5倍关注"
+                    },
+                    {
+                        "id":  "m021",
+                        "risk_id":  "R002",
+                        "signal_id":  "R002-S01",
+                        "signal_name":  "期末收入确认异常",
+                        "name":  "Q4收入占比",
+                        "unit":  "%",
+                        "formula":  "q.q4_rev / y0.revenue * 100",
+                        "rules":  [
+                                      {
+                                          "level":  "高风险",
+                                          "cond":  "v \u003e 40"
+                                      },
+                                      {
+                                          "level":  "关注",
+                                          "cond":  "v \u003e 35"
+                                      }
+                                  ],
+                        "basis":  "规则:R002 高风险\u003e40%;关注35%~40%"
+                    },
+                    {
+                        "id":  "m022",
+                        "risk_id":  "R002",
+                        "signal_id":  "R002-S01",
+                        "signal_name":  "期末收入确认异常",
+                        "name":  "下半年收入占比",
+                        "unit":  "%",
+                        "formula":  "(q.q3_rev + q.q4_rev)/y0.revenue*100",
+                        "rules":  [
+                                      {
+                                          "level":  "高风险",
+                                          "cond":  "v \u003e 60"
+                                      },
+                                      {
+                                          "level":  "关注",
+                                          "cond":  "v \u003e 55"
+                                      }
+                                  ],
+                        "basis":  "规则:下半年收入占比\u003e60%高风险;55%~60%关注"
+                    },
+                    {
+                        "id":  "m023",
+                        "risk_id":  "R002",
+                        "signal_id":  "R002-S08",
+                        "signal_name":  "毛利率期末异常波动",
+                        "name":  "Q4毛利率偏离度",
+                        "unit":  "个百分点",
+                        "formula":  "((q.q4_rev-q.q4_cost)/q.q4_rev - ((q.q1_rev-q.q1_cost)/q.q1_rev + (q.q2_rev-q.q2_cost)/q.q2_rev + (q.q3_rev-q.q3_cost)/q.q3_rev)/3)*100",
+                        "rules":  [
+                                      {
+                                          "level":  "高风险",
+                                          "cond":  "abs(v) \u003e 5"
+                                      },
+                                      {
+                                          "level":  "关注",
+                                          "cond":  "abs(v) \u003e 3"
+                                      }
+                                  ],
+                        "basis":  "规则:Q4毛利率偏离前三季均值\u003e5pct(无论高低)高风险;3~5pct关注"
+                    },
+                    {
+                        "id":  "m024",
+                        "risk_id":  "R002",
+                        "signal_id":  "R002-S02",
+                        "signal_name":  "应收账款与收入增速背离",
+                        "name":  "应收账款增速差",
+                        "unit":  "个百分点",
+                        "formula":  "(y0.ar-y1.ar)/y1.ar*100 - (y0.revenue-y1.revenue)/y1.revenue*100",
+                        "rules":  [
+                                      {
+                                          "level":  "高风险",
+                                          "cond":  "v \u003e 30"
+                                      },
+                                      {
+                                          "level":  "关注",
+                                          "cond":  "v \u003e 10"
+                                      }
+                                  ],
+                        "basis":  "规则:应收增速差\u003e30pct高风险;10~30pct关注"
+                    },
+                    {
+                        "id":  "m025",
+                        "risk_id":  "R002",
+                        "signal_id":  "R002-S04",
+                        "signal_name":  "合同负债/预收账款异常减少",
+                        "name":  "合同负债与预收合计同比变动率",
+                        "unit":  "%",
+                        "formula":  "(y0.contract_liab + y0.adv_from_customer - y1.contract_liab - y1.adv_from_customer)/(y1.contract_liab + y1.adv_from_customer)*100",
+                        "rules":  [
+                                      {
+                                          "level":  "高风险",
+                                          "cond":  "v \u003c -30 and (y0.revenue-y1.revenue)/y1.revenue \u003e 0"
+                                      },
+                                      {
+                                          "level":  "关注",
+                                          "cond":  "v \u003c -20"
+                                      }
+                                  ],
+                        "basis":  "规则:合同负债(预收)大降\u003e30%而营收增长=高风险;降15%~25%关注"
+                    },
+                    {
+                        "id":  "m026",
+                        "risk_id":  "R004",
+                        "signal_id":  "R004-S01",
+                        "signal_name":  "毛利率异常走高",
+                        "name":  "毛利率同比变动",
+                        "unit":  "个百分点",
+                        "formula":  "(y0.revenue-y0.cost)/y0.revenue*100 - (y1.revenue-y1.cost)/y1.revenue*100",
+                        "rules":  [
+                                      {
+                                          "level":  "关注",
+                                          "cond":  "v \u003e 5"
+                                      }
+                                  ],
+                        "basis":  "规则:少计/延迟结转成本→毛利率持续异常走高;\u003e5pct 机器先标关注,第三步解释复核"
+                    },
+                    {
+                        "id":  "m027",
+                        "risk_id":  "R004",
+                        "signal_id":  "R004-S02",
+                        "signal_name":  "存货结转与成本不匹配",
+                        "name":  "存货增速-营业成本增速",
+                        "unit":  "个百分点",
+                        "formula":  "(y0.inventory-y1.inventory)/y1.inventory*100 - (y0.cost-y1.cost)/y1.cost*100",
+                        "rules":  [
+                                      {
+                                          "level":  "高风险",
+                                          "cond":  "v \u003e 20"
+                                      },
+                                      {
+                                          "level":  "关注",
+                                          "cond":  "v \u003e 10"
+                                      }
+                                  ],
+                        "basis":  "规则:存货增速远超营业成本增速,存在少结转成本嫌疑"
+                    },
+                    {
+                        "id":  "m028",
+                        "risk_id":  "R005",
+                        "signal_id":  "R005-S01",
+                        "signal_name":  "期间费用率异常下降",
+                        "name":  "期间费用率(销售+管理+研发)/营收",
+                        "unit":  "%",
+                        "formula":  "(y0.sales_expense + y0.admin_expense + y0.rd_expense)/y0.revenue*100",
+                        "rules":  [
+                                      {
+                                          "level":  "关注",
+                                          "cond":  "v - (y1.sales_expense + y1.admin_expense + y1.rd_expense)/y1.revenue*100 \u003c -5"
+                                      }
+                                  ],
+                        "basis":  "规则:费用率较历史下降\u003e5pct 且无合理解释为高风险;机器先标关注"
+                    },
+                    {
+                        "id":  "m029",
+                        "risk_id":  "R005",
+                        "signal_id":  "R005-S02",
+                        "signal_name":  "费用增速与营收增速背离",
+                        "name":  "费用-营收增速差(销售费用率弹性)",
+                        "unit":  "个百分点",
+                        "formula":  "(y0.sales_expense-y1.sales_expense)/y1.sales_expense*100 - (y0.revenue-y1.revenue)/y1.revenue*100",
+                        "rules":  [
+                                      {
+                                          "level":  "高风险",
+                                          "cond":  "v \u003c -20"
+                                      },
+                                      {
+                                          "level":  "关注",
+                                          "cond":  "v \u003c -10"
+                                      }
+                                  ],
+                        "basis":  "规则:费用增速远低于营收增速(背离\u003c-20pct,营收扩张而费用不增)高风险;\u003c-10pct关注"
+                    },
+                    {
+                        "id":  "m030",
+                        "risk_id":  "R006",
+                        "signal_id":  "R006-S02",
+                        "signal_name":  "研发投入强度异常",
+                        "name":  "研发费用率同比变动",
+                        "unit":  "个百分点",
+                        "formula":  "y0.rd_expense/y0.revenue*100 - y1.rd_expense/y1.revenue*100",
+                        "rules":  [
+                                      {
+                                          "level":  "关注",
+                                          "cond":  "v \u003c -5"
+                                      }
+                                  ],
+                        "basis":  "规则:研发投入强度大幅下滑\u003e10pct 且异常为高风险(高企/骤降均复核);机器先标关注"
+                    },
+                    {
+                        "id":  "m031",
+                        "risk_id":  "R007",
+                        "signal_id":  "R007-S01",
+                        "signal_name":  "存货余额异常增长、周转率下降",
+                        "name":  "存货周转天数变动",
+                        "unit":  "天",
+                        "formula":  "365/(y0.cost/avg(y0.inventory,y1.inventory)) - 365/(y1.cost/avg(y1.inventory,y2.inventory))",
+                        "rules":  [
+                                      {
+                                          "level":  "高风险",
+                                          "cond":  "v \u003e 30"
+                                      },
+                                      {
+                                          "level":  "关注",
+                                          "cond":  "v \u003e 15"
+                                      }
+                                  ],
+                        "basis":  "规则:存货周转天数同比增加\u003e30天高风险;15~30天关注"
+                    },
+                    {
+                        "id":  "m032",
+                        "risk_id":  "R008",
+                        "signal_id":  "R008-S01",
+                        "signal_name":  "在建工程异常增长",
+                        "name":  "在建工程增长偏离度",
+                        "unit":  "个百分点",
+                        "formula":  "(y0.cip-y1.cip)/y1.cip*100 - (y0.revenue-y1.revenue)/y1.revenue*100",
+                        "rules":  [
+                                      {
+                                          "level":  "高风险",
+                                          "cond":  "v \u003e 30"
+                                      },
+                                      {
+                                          "level":  "关注",
+                                          "cond":  "v \u003e 10"
+                                      }
+                                  ],
+                        "basis":  "阈值表R008:在建工程增长率-营收增长率 \u003e30pct 高风险;10~30pct 关注"
+                    },
+                    {
+                        "id":  "m033",
+                        "risk_id":  "R008",
+                        "signal_id":  "R008-S04",
+                        "signal_name":  "固定资产异常增长",
+                        "name":  "固定资产增长偏离度",
+                        "unit":  "个百分点",
+                        "formula":  "(y0.fixed_assets-y1.fixed_assets)/y1.fixed_assets*100 - (y0.revenue-y1.revenue)/y1.revenue*100",
+                        "rules":  [
+                                      {
+                                          "level":  "高风险",
+                                          "cond":  "v \u003e 30"
+                                      },
+                                      {
+                                          "level":  "关注",
+                                          "cond":  "v \u003e 10"
+                                      }
+                                  ],
+                        "basis":  "阈值表R008:固定资产增速-营收增速\u003e30pct 高风险;10~30pct 关注(需匹配产能/产量解释)"
+                    },
+                    {
+                        "id":  "m034",
+                        "risk_id":  "R009",
+                        "signal_id":  "R009-S03",
+                        "signal_name":  "货币资金与有息负债大存大贷",
+                        "name":  "有息负债/货币资金",
+                        "unit":  "倍",
+                        "formula":  "(y0.st_loan + y0.lt_loan + y0.bond_payable + y0.noncurrent_liab_due)/y0.cash",
+                        "rules":  [
+                                      {
+                                          "level":  "高风险",
+                                          "cond":  "v \u003e 3"
+                                      },
+                                      {
+                                          "level":  "关注",
+                                          "cond":  "v \u003e 1"
+                                      }
+                                  ],
+                        "basis":  "规则:同时存在较高货币资金与有息负债为关注;资金用途无法解释升级(机器用比值初筛)"
+                    },
+                    {
+                        "id":  "m035",
+                        "risk_id":  "R009",
+                        "signal_id":  "R009-S01",
+                        "signal_name":  "货币资金异常增长",
+                        "name":  "货币资金增速-营收增速",
+                        "unit":  "个百分点",
+                        "formula":  "(y0.cash-y1.cash)/y1.cash*100 - (y0.revenue-y1.revenue)/y1.revenue*100",
+                        "rules":  [
+                                      {
+                                          "level":  "关注",
+                                          "cond":  "v \u003e 50"
+                                      }
+                                  ],
+                        "basis":  "规则:货币资金大幅异常增长且无法由融资/经营/并购解释=高风险;机器先标关注"
+                    },
+                    {
+                        "id":  "m036",
+                        "risk_id":  "R010",
+                        "signal_id":  "R010-S01",
+                        "signal_name":  "商誉规模异常",
+                        "name":  "商誉/净资产",
+                        "unit":  "%",
+                        "formula":  "y0.goodwill/y0.equity_parent*100",
+                        "rules":  [
+
+                                  ],
+                        "basis":  "比例用于筛查不设统一数值(规则库原文);结合并购历史判断,交由复核"
+                    },
+                    {
+                        "id":  "m037",
+                        "risk_id":  "R011",
+                        "signal_id":  "R011-S01",
+                        "signal_name":  "应收账款异常增长",
+                        "name":  "应收账款增速差",
+                        "unit":  "个百分点",
+                        "formula":  "(y0.ar-y1.ar)/y1.ar*100 - (y0.revenue-y1.revenue)/y1.revenue*100",
+                        "rules":  [
+                                      {
+                                          "level":  "高风险",
+                                          "cond":  "v \u003e 30"
+                                      },
+                                      {
+                                          "level":  "关注",
+                                          "cond":  "v \u003e 10"
+                                      }
+                                  ],
+                        "basis":  "规则:应收大幅增长且无信用政策/结算方式解释→升级;增速差\u003e30pct 高风险"
+                    },
+                    {
+                        "id":  "m038",
+                        "risk_id":  "R011",
+                        "signal_id":  "R011-S04",
+                        "signal_name":  "坏账准备计提比例异常",
+                        "name":  "坏账准备/应收账款",
+                        "unit":  "%",
+                        "formula":  "y0.bad_allowance/y0.ar*100",
+                        "rules":  [
+                                      {
+                                          "level":  "关注",
+                                          "cond":  "v \u003c (y1.bad_allowance/y1.ar*100) - 3"
+                                      }
+                                  ],
+                        "basis":  "规则:账龄恶化背景下计提比例同比下降\u003e3pct 高风险;机器先标关注(需账龄数据复核)"
+                    },
+                    {
+                        "id":  "m039",
+                        "risk_id":  "R013",
+                        "signal_id":  "R013-S02",
+                        "signal_name":  "其他应收款异常增长/大额挂账",
+                        "name":  "其他应收款占总资产比",
+                        "unit":  "%",
+                        "formula":  "y0.other_receivable/y0.total_assets*100",
+                        "rules":  [
+                                      {
+                                          "level":  "关注",
+                                          "cond":  "v \u003e 5"
+                                      }
+                                  ],
+                        "basis":  "规则:其他应收款占总资产\u003e5%触发关注;同比大幅异常增加叠加更可疑"
+                    },
+                    {
+                        "id":  "m040",
+                        "risk_id":  "R013",
+                        "signal_id":  "R013-S01",
+                        "signal_name":  "预付款项异常增长/长期挂账",
+                        "name":  "预付款项同比增速",
+                        "unit":  "%",
+                        "formula":  "(y0.adv_receipt-y1.adv_receipt)/y1.adv_receipt*100",
+                        "rules":  [
+                                      {
+                                          "level":  "关注",
+                                          "cond":  "v \u003e 100"
+                                      }
+                                  ],
+                        "basis":  "规则:预付款项增长率同比大幅飙升触发关注(需结合资金流向核查)"
+                    },
+                    {
+                        "id":  "m041",
+                        "risk_id":  "R013",
+                        "signal_id":  "R013-S04",
+                        "signal_name":  "货币资金与有息负债大存大贷",
+                        "name":  "有息负债/货币资金",
+                        "unit":  "倍",
+                        "formula":  "(y0.st_loan + y0.lt_loan + y0.bond_payable + y0.noncurrent_liab_due)/y0.cash",
+                        "rules":  [
+                                      {
+                                          "level":  "高风险",
+                                          "cond":  "v \u003e 3"
+                                      },
+                                      {
+                                          "level":  "关注",
+                                          "cond":  "v \u003e 1"
+                                      }
+                                  ],
+                        "basis":  "规则:有息负债远高于账面货币资金且利息收入低于活期收益→关注资金占用"
+                    },
+                    {
+                        "id":  "m042",
+                        "risk_id":  "R003",
+                        "signal_id":  "R003-S01",
+                        "signal_name":  "扣非与净利润增速背离",
+                        "name":  "净利润增速-扣非净利润增速",
+                        "unit":  "个百分点",
+                        "formula":  "(y0.net_profit-y1.net_profit)/abs(y1.net_profit)*100 - (y0.deduct_profit-y1.deduct_profit)/abs(y1.deduct_profit)*100",
+                        "rules":  [
+                                      {
+                                          "level":  "高风险",
+                                          "cond":  "v \u003e 30"
+                                      },
+                                      {
+                                          "level":  "关注",
+                                          "cond":  "v \u003e 10"
+                                      }
+                                  ],
+                        "basis":  "规则:非经常性损益驱动利润,扣非增速远低于净利增速(差\u003e30pct)需警惕虚增非经常性损益"
+                    },
+                    {
+                        "id":  "m043",
+                        "risk_id":  "R012",
+                        "signal_id":  "R012-S03",
+                        "signal_name":  "对陌生第三方营收占比偏高",
+                        "name":  "前五大客户集中度CR5",
+                        "unit":  "%",
+                        "formula":  "extra.top5_customer_ratio",
+                        "rules":  [
+                                      {
+                                          "level":  "关注",
+                                          "cond":  "v \u003e 70"
+                                      }
+                                  ],
+                        "basis":  "规则:CR5\u003e70%且客户集中度持续上升=关注(需核查客户背景与新增主体)"
+                    },
+                    {
+                        "id":  "m044",
+                        "risk_id":  "R001",
+                        "signal_id":  "R001-S02",
+                        "signal_name":  "应收账款异常膨胀",
+                        "name":  "应收账款同比增长率",
+                        "unit":  "%",
+                        "formula":  "(y0.ar-y1.ar)/y1.ar*100",
+                        "rules":  [
+
+                                  ],
+                        "basis":  "中间变量:配合应收增速差与营收增速判断,交由大模型与人工复核"
+                    },
+                    {
+                        "id":  "m045",
+                        "risk_id":  "R001",
+                        "signal_id":  "R001-S02",
+                        "signal_name":  "应收账款异常膨胀",
+                        "name":  "营业收入同比增长率",
+                        "unit":  "%",
+                        "formula":  "(y0.revenue-y1.revenue)/y1.revenue*100",
+                        "rules":  [
+
+                                  ],
+                        "basis":  "中间变量:增速的合理性/行业偏离由大模型+人工判断"
+                    },
+                    {
+                        "id":  "m046",
+                        "risk_id":  "R001",
+                        "signal_id":  "R001-S02",
+                        "signal_name":  "应收账款异常膨胀",
+                        "name":  "应收账款营收比",
+                        "unit":  "%",
+                        "formula":  "y0.ar/y0.revenue*100",
+                        "rules":  [
+                                      {
+                                          "level":  "关注",
+                                          "cond":  "v \u003e 30"
+                                      }
+                                  ],
+                        "basis":  "规则:应收营收比\u003e30%且连续上升更可疑;机器以单年\u003e30%标关注,连续趋势由大模型+人工复核"
+                    },
+                    {
+                        "id":  "m047",
+                        "risk_id":  "R001",
+                        "signal_id":  "R001-S02",
+                        "signal_name":  "应收账款异常膨胀",
+                        "name":  "平均应收账款余额",
+                        "unit":  "万元",
+                        "formula":  "avg(y0.ar,y1.ar)",
+                        "rules":  [
+
+                                  ],
+                        "basis":  "中间变量"
+                    },
+                    {
+                        "id":  "m048",
+                        "risk_id":  "R001",
+                        "signal_id":  "R001-S02",
+                        "signal_name":  "应收账款异常膨胀",
+                        "name":  "应收账款周转率",
+                        "unit":  "次",
+                        "formula":  "y0.revenue/avg(y0.ar,y1.ar)",
+                        "rules":  [
+
+                                  ],
+                        "basis":  "中间变量:周转率同比降幅\u003e20%的风险已由『应收账款周转天数』同比判定覆盖"
+                    },
+                    {
+                        "id":  "m049",
+                        "risk_id":  "R001",
+                        "signal_id":  "R001-S04",
+                        "signal_name":  "收入增长异常",
+                        "name":  "营业收入同比增长率",
+                        "unit":  "%",
+                        "formula":  "(y0.revenue-y1.revenue)/y1.revenue*100",
+                        "rules":  [
+
+                                  ],
+                        "basis":  "中间变量:增速的行业偏离(SGI/行业对比)由大模型+人工判断"
+                    },
+                    {
+                        "id":  "m050",
+                        "risk_id":  "R001",
+                        "signal_id":  "R001-S05",
+                        "signal_name":  "存货与营收背离",
+                        "name":  "存货周转天数",
+                        "unit":  "天",
+                        "formula":  "365/(y0.cost/avg(y0.inventory,y1.inventory))",
+                        "rules":  [
+
+                                  ],
+                        "basis":  "中间变量:天数激增/成本结转不足由存货增速差与周转率同比预警"
+                    },
+                    {
+                        "id":  "m051",
+                        "risk_id":  "R001",
+                        "signal_id":  "R001-S05",
+                        "signal_name":  "存货与营收背离",
+                        "name":  "存货同比增长率",
+                        "unit":  "%",
+                        "formula":  "(y0.inventory-y1.inventory)/y1.inventory*100",
+                        "rules":  [
+
+                                  ],
+                        "basis":  "中间变量"
+                    },
+                    {
+                        "id":  "m052",
+                        "risk_id":  "R001",
+                        "signal_id":  "R001-S05",
+                        "signal_name":  "存货与营收背离",
+                        "name":  "营业成本同比增长率",
+                        "unit":  "%",
+                        "formula":  "(y0.cost-y1.cost)/y1.cost*100",
+                        "rules":  [
+
+                                  ],
+                        "basis":  "中间变量"
+                    },
+                    {
+                        "id":  "m053",
+                        "risk_id":  "R001",
+                        "signal_id":  "R001-S06",
+                        "signal_name":  "应计利润异常",
+                        "name":  "平均总资产",
+                        "unit":  "万元",
+                        "formula":  "avg(y0.total_assets,y1.total_assets)",
+                        "rules":  [
+
+                                  ],
+                        "basis":  "中间变量"
+                    },
+                    {
+                        "id":  "m054",
+                        "risk_id":  "R001",
+                        "signal_id":  "R001-S09",
+                        "signal_name":  "人均产值与薪酬背离",
+                        "name":  "人均产值",
+                        "unit":  "万元/人",
+                        "formula":  "y0.revenue/y0.staff_end",
+                        "rules":  [
+
+                                  ],
+                        "basis":  "中间变量:是否显著高于行业(如高鸿2021约673万/人)需行业对比,机器无行业库不判级,由大模型+人工判断"
+                    },
+                    {
+                        "id":  "m055",
+                        "risk_id":  "R001",
+                        "signal_id":  "R001-S09",
+                        "signal_name":  "人均产值与薪酬背离",
+                        "name":  "人均薪酬",
+                        "unit":  "万元/人",
+                        "formula":  "y0.staff_cash_out/y0.staff_end",
+                        "rules":  [
+
+                                  ],
+                        "basis":  "中间变量"
+                    },
+                    {
+                        "id":  "m056",
+                        "risk_id":  "R001",
+                        "signal_id":  "R001-S03",
+                        "signal_name":  "毛利率异常偏高",
+                        "name":  "上期销售毛利率",
+                        "unit":  "%",
+                        "formula":  "(y1.revenue-y1.cost)/y1.revenue*100",
+                        "rules":  [
+
+                                  ],
+                        "basis":  "中间变量:用于毛利率同比与 GMI 的口径对照,风险判断交大模型+人工"
+                    },
+                    {
+                        "id":  "m057",
+                        "risk_id":  "R001",
+                        "signal_id":  "R001-S03",
+                        "signal_name":  "毛利率异常偏高",
+                        "name":  "Q4 毛利率环比变动",
+                        "unit":  "个百分点",
+                        "formula":  "((q.q4_rev-q.q4_cost)/q.q4_rev*100-(q.q3_rev-q.q3_cost)/q.q3_rev*100)",
+                        "rules":  [
+                                      {
+                                          "level":  "高风险",
+                                          "cond":  "v \u003e 5"
+                                      },
+                                      {
+                                          "level":  "关注",
+                                          "cond":  "v \u003e 3"
+                                      }
+                                  ],
+                        "basis":  "规则:Q4毛利率较Q3突增\u003e5pp高风险、3~5pp关注(需分季度成本数据)"
+                    },
+                    {
+                        "id":  "m058",
+                        "risk_id":  "R001",
+                        "signal_id":  "R001-S03",
+                        "signal_name":  "毛利率异常偏高",
+                        "name":  "毛利率行业偏离度",
+                        "unit":  "个百分点",
+                        "formula":  "(y0.revenue-y0.cost)/y0.revenue*100-extra.ind_gross_margin",
+                        "rules":  [
+
+                                  ],
+                        "requires_extra":  [
+                                               "ind_gross_margin"
+                                           ],
+
+                        "basis":  "公司毛利率-行业平均销售毛利率(百分点,行业值取自基准表,②页可人工覆盖,默认值仅示意须核对);正值=高于行业,幅度供大模型+人工判读"
+                    },
+                    {
+                        "id":  "m059",
+                        "risk_id":  "R001",
+                        "signal_id":  "R001-S03",
+                        "signal_name":  "毛利率异常偏高",
+                        "name":  "单季销售毛利率",
+                        "unit":  "%",
+                        "formula":  "(q.q4_rev-q.q4_cost)/q.q4_rev*100",
+                        "rules":  [
+
+                                  ],
+                        "basis":  "Q4单季毛利率=(Q4营收-Q4成本)/Q4营收;为中间变量,环比异常由『Q4毛利率环比变动』判定",
+                        "requires_quarter":  [
+                                                 "q4_rev",
+                                                 "q4_cost"
+                                             ]
+                    },
+                    {
+                        "id":  "m060",
+                        "risk_id":  "R001",
+                        "signal_id":  "R001-S04",
+                        "signal_name":  "收入增长异常",
+                        "name":  "净利润同比增长率",
+                        "unit":  "%",
+                        "formula":  "(y0.net_profit-y1.net_profit)/abs(y1.net_profit)*100",
+                        "rules":  [
+
+                                  ],
+                        "basis":  "中间变量:上年亏损/扭亏时按绝对值口径,仅展示,判断交大模型+人工"
+                    },
+                    {
+                        "id":  "m061",
+                        "risk_id":  "R001",
+                        "signal_id":  "R001-S04",
+                        "signal_name":  "收入增长异常",
+                        "name":  "行业平均营业收入增长率",
+                        "unit":  "%",
+                        "formula":  "extra.ind_rev_growth",
+                        "rules":  [
+
+                                  ],
+                        "requires_extra":  [
+                                               "ind_rev_growth"
+                                           ],
+
+                        "basis":  "行业营业收入增速基准值(取自行业基准表,②页可人工覆盖,默认值仅示意须核对);与公司增速的偏离见『营收增长行业偏离』"
+                    },
+                    {
+                        "id":  "m062",
+                        "risk_id":  "R001",
+                        "signal_id":  "R001-S04",
+                        "signal_name":  "收入增长异常",
+                        "name":  "营收增长行业偏离",
+                        "unit":  "个百分点",
+                        "formula":  "(y0.revenue-y1.revenue)/y1.revenue*100-extra.ind_rev_growth",
+                        "rules":  [
+
+                                  ],
+                        "requires_extra":  [
+                                               "ind_rev_growth"
+                                           ],
+
+                        "basis":  "公司营收增速-行业营收增速(百分点,行业值取自基准表,②页可人工覆盖,默认值仅示意须核对);正值=跑赢行业,方向与幅度供大模型+人工判读"
+                    },
+                    {
+                        "id":  "m063",
+                        "risk_id":  "R001",
+                        "signal_id":  "R001-S04",
+                        "signal_name":  "收入增长异常",
+                        "name":  "营业收入三年 CAGR",
+                        "unit":  "%",
+                        "formula":  "(y0.revenue/extra.y_m3_rev)**(1/3)*100-100",
+                        "rules":  [
+                                      {
+                                          "cond":  "v \u003e 30 and (y0.revenue-y1.revenue)/y1.revenue*100 \u003e 30",
+                                          "level":  "关注"
+                                      }
+                                  ],
+                        "basis":  "三年CAGR=(Y0营收/三年前营收)^(1/3)-1;超过30%且最近一年增速仍高于30%标关注(近似规则库口径)",
+                        "requires_extra":  [
+                                               "y_m3_rev"
+                                           ]
+                    },
+                    {
+                        "id":  "m064",
+                        "risk_id":  "R001",
+                        "signal_id":  "R001-S05",
+                        "signal_name":  "存货与营收背离",
+                        "name":  "平均存货余额",
+                        "unit":  "万元",
+                        "formula":  "avg(y0.inventory,y1.inventory)",
+                        "rules":  [
+
+                                  ],
+                        "basis":  "中间变量"
+                    },
+                    {
+                        "id":  "m065",
+                        "risk_id":  "R001",
+                        "signal_id":  "R001-S05",
+                        "signal_name":  "存货与营收背离",
+                        "name":  "存货周转率同比变动",
+                        "unit":  "次",
+                        "formula":  "y0.cost/avg(y0.inventory,y1.inventory) - y1.cost/avg(y1.inventory,y2.inventory)",
+                        "rules":  [
+
+                                  ],
+                        "basis":  "中间变量:同比降幅\u003e20%的风险已由『存货周转率』同比判定覆盖(该指标需 Y2 数据)"
+                    },
+                    {
+                        "id":  "m066",
+                        "risk_id":  "R001",
+                        "signal_id":  "R001-S06",
+                        "signal_name":  "应计利润异常",
+                        "name":  "本期营运资本",
+                        "unit":  "万元",
+                        "formula":  "y0.current_assets-y0.current_liab",
+                        "rules":  [
+
+                                  ],
+                        "basis":  "中间变量"
+                    },
+                    {
+                        "id":  "m067",
+                        "risk_id":  "R001",
+                        "signal_id":  "R001-S06",
+                        "signal_name":  "应计利润异常",
+                        "name":  "上期营运资本",
+                        "unit":  "万元",
+                        "formula":  "y1.current_assets-y1.current_liab",
+                        "rules":  [
+
+                                  ],
+                        "basis":  "中间变量"
+                    },
+                    {
+                        "id":  "m068",
+                        "risk_id":  "R001",
+                        "signal_id":  "R001-S06",
+                        "signal_name":  "应计利润异常",
+                        "name":  "营运资本增加额",
+                        "unit":  "万元",
+                        "formula":  "(y0.current_assets-y0.current_liab)-(y1.current_assets-y1.current_liab)",
+                        "rules":  [
+
+                                  ],
+                        "basis":  "中间变量"
+                    },
+                    {
+                        "id":  "m069",
+                        "risk_id":  "R001",
+                        "signal_id":  "R001-S06",
+                        "signal_name":  "应计利润异常",
+                        "name":  "营运资本应计率",
+                        "unit":  "%",
+                        "formula":  "((y0.current_assets-y0.current_liab)-(y1.current_assets-y1.current_liab))/avg(y0.total_assets,y1.total_assets)*100",
+                        "rules":  [
+                                      {
+                                          "level":  "关注",
+                                          "cond":  "v \u003e 8"
+                                      }
+                                  ],
+                        "basis":  "规则:营运资本应计率连续2年\u003e8%=高风险;机器单年\u003e8%标关注,连续两年由大模型+人工复核"
+                    },
+                    {
+                        "id":  "m070",
+                        "risk_id":  "R001",
+                        "signal_id":  "R001-S07",
+                        "signal_name":  "客户与交易结构异常",
+                        "name":  "CR5",
+                        "unit":  "%",
+                        "formula":  "extra.top5_customer_ratio",
+                        "rules":  [
+                                      {
+                                          "level":  "关注",
+                                          "cond":  "v \u003e 70"
+                                      }
+                                  ],
+                        "basis":  "规则:CR5\u003e70%且集中度持续上升=关注;机器单年\u003e70%标关注,持续趋势由大模型+人工"
+                    },
+                    {
+                        "id":  "m071",
+                        "risk_id":  "R001",
+                        "signal_id":  "R001-S07",
+                        "signal_name":  "客户与交易结构异常",
+                        "name":  "CR1",
+                        "unit":  "%",
+                        "formula":  "extra.top1_customer_ratio",
+                        "rules":  [
+                                      {
+                                          "level":  "关注",
+                                          "cond":  "v \u003e 30"
+                                      }
+                                  ],
+                        "basis":  "规则:CR1\u003e30%且为新增大客户=高风险;机器单年\u003e30%标关注(是否新增需客户名单文本,交大模型+人工)"
+                    },
+                    {
+                        "id":  "m072",
+                        "risk_id":  "R001",
+                        "signal_id":  "R001-S07",
+                        "signal_name":  "客户与交易结构异常",
+                        "name":  "关联方销售占比",
+                        "unit":  "%",
+                        "formula":  "extra.related_sales_ratio",
+                        "rules":  [
+                                      {
+                                          "level":  "高风险",
+                                          "cond":  "v \u003e 20"
+                                      }
+                                  ],
+                        "basis":  "规则:关联方销售占比\u003e20%=高风险"
+                    },
+                    {
+                        "id":  "m073",
+                        "risk_id":  "R001",
+                        "signal_id":  "R001-S07",
+                        "signal_name":  "客户与交易结构异常",
+                        "name":  "前五大客户销售额合计",
+                        "unit":  "万元",
+                        "formula":  "extra.top5_customer_sales",
+                        "rules":  [
+
+                                  ],
+                        "basis":  "取自年报前五名客户销售额合计或披露明细求和;集中度风险由CR5/CR1判定",
+                        "requires_extra":  [
+                                               "top5_customer_sales"
+                                           ]
+                    },
+                    {
+                        "id":  "m074",
+                        "risk_id":  "R001",
+                        "signal_id":  "R001-S07",
+                        "signal_name":  "客户与交易结构异常",
+                        "name":  "新增客户销售额",
+                        "unit":  "万元",
+                        "formula":  "extra.new_customer_sales",
+                        "rules":  [
+
+                                  ],
+                        "basis":  "年报披露的本年新增前五大客户销售额合计;占比风险由『新增客户销售额占比』判定",
+                        "requires_extra":  [
+                                               "new_customer_sales"
+                                           ]
+                    },
+                    {
+                        "id":  "m075",
+                        "risk_id":  "R001",
+                        "signal_id":  "R001-S07",
+                        "signal_name":  "客户与交易结构异常",
+                        "name":  "新增客户销售额占比",
+                        "unit":  "%",
+                        "formula":  "extra.new_customer_sales/y0.revenue*100",
+                        "rules":  [
+                                      {
+                                          "cond":  "v \u003e 20",
+                                          "level":  "高风险"
+                                      },
+                                      {
+                                          "cond":  "v \u003e 10",
+                                          "level":  "关注"
+                                      }
+                                  ],
+                        "basis":  "规则:新增客户销售额占比\u003e20%高风险;10%~20%关注",
+                        "requires_extra":  [
+                                               "new_customer_sales"
+                                           ]
+                    },
+                    {
+                        "id":  "m076",
+                        "risk_id":  "R001",
+                        "signal_id":  "R001-S07",
+                        "signal_name":  "客户与交易结构异常",
+                        "name":  "客户供应商重叠数",
+                        "unit":  "家",
+                        "formula":  "extra.customer_supplier_overlap",
+                        "rules":  [
+                                      {
+                                          "cond":  "v \u003e= 1",
+                                          "level":  "高风险"
+                                      }
+                                  ],
+                        "basis":  "规则:前五大客户与前五大供应商重叠\u003e=1家=高风险(循环交易/无商业实质嫌疑)",
+                        "requires_extra":  [
+                                               "customer_supplier_overlap"
+                                           ]
+                    },
+                    {
+                        "id":  "m077",
+                        "risk_id":  "R001",
+                        "signal_id":  "R001-S08",
+                        "signal_name":  "期末收入确认异常",
+                        "name":  "Q4 营业收入",
+                        "unit":  "万元",
+                        "formula":  "q.q4_rev",
+                        "rules":  [
+
+                                  ],
+                        "basis":  "中间变量:未直接披露时由全年减前三季推算(抽取端已处理)"
+                    },
+                    {
+                        "id":  "m078",
+                        "risk_id":  "R001",
+                        "signal_id":  "R001-S08",
+                        "signal_name":  "期末收入确认异常",
+                        "name":  "Q3 营业收入",
+                        "unit":  "万元",
+                        "formula":  "q.q3_rev",
+                        "rules":  [
+
+                                  ],
+                        "basis":  "中间变量"
+                    },
+                    {
+                        "id":  "m079",
+                        "risk_id":  "R001",
+                        "signal_id":  "R001-S08",
+                        "signal_name":  "期末收入确认异常",
+                        "name":  "次年 Q1 收入回落率",
+                        "unit":  "%",
+                        "formula":  "(q.next_q1_rev-q.q4_rev)/q.q4_rev*100",
+                        "rules":  [
+                                      {
+                                          "level":  "高风险",
+                                          "cond":  "v \u003c -30"
+                                      }
+                                  ],
+                        "basis":  "规则:次年Q1收入较当年Q4回落\u003e30%=高风险(需次年Q1数据)"
+                    },
+                    {
+                        "id":  "m080",
+                        "risk_id":  "R001",
+                        "signal_id":  "R001-S08",
+                        "signal_name":  "期末收入确认异常",
+                        "name":  "历史 Q4 收入占比均值",
+                        "unit":  "%",
+                        "formula":  "extra.hist_q4_rev_ratio",
+                        "rules":  [
+
+                                  ],
+                        "requires_extra":  [
+                                               "hist_q4_rev_ratio"
+                                           ],
+
+                        "basis":  "前三年(如2018-2020)Q4 收入占全年比重均值(%)。年报单期通常不披露多年分季度表,需人工在③页『待人工补齐清单』录入该均值(建议来源:Wind/Choice 历史分季度数据或公司定期报告);录入后供 m081 计算当期 Q4 占比偏离。"
+                    },
+                    {
+                        "id":  "m081",
+                        "risk_id":  "R001",
+                        "signal_id":  "R001-S08",
+                        "signal_name":  "期末收入确认异常",
+                        "name":  "Q4 收入占比偏离度",
+                        "unit":  "个百分点",
+                        "formula":  "q.q4_rev/y0.revenue*100-extra.hist_q4_rev_ratio",
+                        "rules":  [
+
+                                  ],
+                        "requires_extra":  [
+                                               "hist_q4_rev_ratio"
+                                           ],
+
+                        "basis":  "当期 Q4 收入占比(=Q4营收/全年营收×100)减历史 Q4 收入占比均值;历史均值(m080)需人工录入。显著为正提示年末集中确认/突击确认收入,方向与幅度供大模型+人工判读。"
+                    },
+                    {
+                        "id":  "m082",
+                        "risk_id":  "R001",
+                        "signal_id":  "R001-S09",
+                        "signal_name":  "人均产值与薪酬背离",
+                        "name":  "人均产值同比增长率",
+                        "unit":  "%",
+                        "formula":  "((y0.revenue/y0.staff_end)/(y1.revenue/y1.staff_end)-1)*100",
+                        "rules":  [
+
+                                  ],
+                        "basis":  "中间变量:配合『员工人数同比增长率』判断(需上年员工数),风险由大模型+人工"
+                    },
+                    {
+                        "id":  "m083",
+                        "risk_id":  "R001",
+                        "signal_id":  "R001-S09",
+                        "signal_name":  "人均产值与薪酬背离",
+                        "name":  "人均产值行业倍数",
+                        "unit":  "倍",
+                        "formula":  "(y0.revenue/y0.staff_end)/extra.ind_per_capita_output",
+                        "rules":  [
+
+                                  ],
+                        "requires_extra":  [
+                                               "ind_per_capita_output"
+                                           ],
+
+                        "basis":  "人均产值÷行业人均产值(行业值取自基准表,②页可人工覆盖,默认值仅示意须核对);显著>1提示人均产出虚高或外包粉饰,交大模型+人工复核"
+                    },
+                    {
+                        "id":  "m084",
+                        "risk_id":  "R001",
+                        "signal_id":  "R001-S09",
+                        "signal_name":  "人均产值与薪酬背离",
+                        "name":  "人均薪酬行业倍数",
+                        "unit":  "倍",
+                        "formula":  "(y0.staff_cash_out/y0.staff_end)/extra.ind_per_capita_pay",
+                        "rules":  [
+
+                                  ],
+                        "requires_extra":  [
+                                               "ind_per_capita_pay"
+                                           ],
+
+                        "basis":  "人均薪酬÷行业人均薪酬(行业值取自基准表,②页可人工覆盖,默认值仅示意须核对);显著偏低/偏高提示体外薪酬或口径异常,交大模型+人工复核"
+                    }
+                ]
 }

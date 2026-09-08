@@ -65,13 +65,16 @@ ar-risk-platform/
 │  ├─ verify.py               # 双校验编排(Step2 计算 / Step3 核验)
 │  ├─ document.py             # PDF→分页文本 / RAG 关键词召回
 │  ├─ report.py               # 风险评估 PDF 报告导出(reportlab 中文字体)
-│  └─ ui.py                   # 页面样式/色值/演示公司载入
+│  ├─ ui.py                   # 页面样式/色值/演示公司载入
+│  ├─ industry.py             # 行业基准表加载/注入机器引擎(extra.ind_*;②页可人工覆盖)
+│  └─ external.py             # 可选联网增强:拉取行业参考 JSON(须人工核对后应用)
 ├─ views/                     # 六个页面
 ├─ data/
 │  ├─ rules.json              # 规则库(自动生成:17 风险/113 信号/391 指标)
-│  ├─ machine_metrics.json    # 机器硬规则指标定义(~40 条公式+阈值)
+│  ├─ machine_metrics.json    # 机器硬规则指标定义(公式+阈值;行业类引用 extra.ind_*)
 │  ├─ cases.json              # 17 个经典案例(与 R001-R017 对应)
 │  ├─ industry.json           # 证监会行业门类
+│  ├─ industry_baseline.json  # 行业基准参照表(示意参考值,非权威;②页可人工覆盖/联网补充)
 │  ├─ raw/                    # 规则库原始 Excel + 解析标签
 │  └─ demo/demo_company.json  # 内置演示公司(离线演示全流程)
 ├─ docs/

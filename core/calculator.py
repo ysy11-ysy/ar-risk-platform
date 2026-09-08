@@ -143,6 +143,25 @@ def run_machine(finance: dict, risk_ids=None) -> list:
                 "machine": True, "metric_id": m.get("id"), "needs_external": True,
             })
             continue
+        # 依赖抽取字段/分季度字段的指标:字段缺失 -> 标"无法计算"而不是误判为"未触发"
+        miss = []
+        for k in m.get("requires_extra", []) or []:
+            if (finance.get("extra") or {}).get(k) is None:
+                miss.append(f"extra.{k}")
+        for k in m.get("requires_quarter", []) or []:
+            if (finance.get("quarter") or {}).get(k) is None:
+                miss.append(f"quarter.{k}")
+        if miss:
+            out.append({
+                "risk_id": m.get("risk_id"), "signal_id": m.get("signal_id"),
+                "signal_name": m.get("signal_name", ""),
+                "indicator": m.get("name"), "value": None, "unit": m.get("unit", ""),
+                "level": "无法计算",
+                "basis": f"缺数据:{'、'.join(miss)};可到①补充抽取或人工清单录入后重算",
+                "expr": m.get("formula", ""),
+                "machine": True, "metric_id": m.get("id"), "missing": miss,
+            })
+            continue
         val = eval_expr(m.get("formula", ""), env)
         if val is not None and isinstance(val, float):
             val = round(val, 4)

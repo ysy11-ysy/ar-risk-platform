@@ -1,0 +1,30 @@
+{
+  "note": "行业基准参照表(默认参考值)。字段单位:per_capita_output=行业人均产值(万元/人/年);per_capita_pay=行业人均薪酬(万元/人/年);gross_margin=行业平均销售毛利率(百分数数值,28 表示 28%,仅适用于有实体产销的门类,银行/保险/房地产/教育/医疗等无标准销售毛利率口径的门类留 null 交由人工判读);rev_growth=行业营业收入增速(百分数数值,5 表示 5%)。\n\n【重要声明】表中数值仅为按公开行业统计量级整理的示意参考,并非特定权威统计口径(不同来源差异大,如统计局行业平均工资 ≠ 年报人均薪酬);正式使用请务必以权威行业数据(Wind/Choice/行业协会统计)核对,或直接在「② 指标计算」页人工覆盖录入——机器指标将按覆盖值重算,可靠性由录入人背书。行业类指标结论仅在该基准可信时成立。",
+  "keys": {
+    "per_capita_output": "行业人均产值(万元/人/年)",
+    "per_capita_pay": "行业人均薪酬(万元/人/年)",
+    "gross_margin": "行业平均销售毛利率(%,不适用=null)",
+    "rev_growth": "行业营业收入增速(%,不适用=null)"
+  },
+  "baseline": {
+    "农、林、牧、渔业": {"per_capita_output": 55.0, "per_capita_pay": 6.0, "gross_margin": 18.0, "rev_growth": 6.0},
+    "采矿业": {"per_capita_output": 160.0, "per_capita_pay": 13.0, "gross_margin": 28.0, "rev_growth": 8.0},
+    "制造业": {"per_capita_output": 90.0, "per_capita_pay": 10.0, "gross_margin": 20.0, "rev_growth": 5.0},
+    "电力、热力、燃气及水生产和供应业": {"per_capita_output": 180.0, "per_capita_pay": 14.0, "gross_margin": 25.0, "rev_growth": 6.0},
+    "建筑业": {"per_capita_output": 85.0, "per_capita_pay": 8.0, "gross_margin": 12.0, "rev_growth": 4.0},
+    "批发和零售业": {"per_capita_output": 200.0, "per_capita_pay": 9.0, "gross_margin": 13.0, "rev_growth": 4.0},
+    "交通运输、仓储和邮政业": {"per_capita_output": 90.0, "per_capita_pay": 10.0, "gross_margin": 20.0, "rev_growth": 5.0},
+    "住宿和餐饮业": {"per_capita_output": 35.0, "per_capita_pay": 5.0, "gross_margin": 45.0, "rev_growth": 8.0},
+    "信息传输、软件和信息技术服务业": {"per_capita_output": 85.0, "per_capita_pay": 18.0, "gross_margin": 40.0, "rev_growth": 10.0},
+    "金融业": {"per_capita_output": 300.0, "per_capita_pay": 25.0, "gross_margin": null, "rev_growth": 5.0},
+    "房地产业": {"per_capita_output": 500.0, "per_capita_pay": 12.0, "gross_margin": null, "rev_growth": -2.0},
+    "租赁和商务服务业": {"per_capita_output": 80.0, "per_capita_pay": 11.0, "gross_margin": 25.0, "rev_growth": 8.0},
+    "科学研究和技术服务业": {"per_capita_output": 75.0, "per_capita_pay": 14.0, "gross_margin": 30.0, "rev_growth": 9.0},
+    "水利、环境和公共设施管理业": {"per_capita_output": 55.0, "per_capita_pay": 8.0, "gross_margin": 25.0, "rev_growth": 7.0},
+    "居民服务、修理和其他服务业": {"per_capita_output": 40.0, "per_capita_pay": 6.0, "gross_margin": 30.0, "rev_growth": 6.0},
+    "教育": {"per_capita_output": 30.0, "per_capita_pay": 9.0, "gross_margin": null, "rev_growth": 8.0},
+    "卫生和社会工作": {"per_capita_output": 45.0, "per_capita_pay": 11.0, "gross_margin": null, "rev_growth": 9.0},
+    "文化、体育和娱乐业": {"per_capita_output": 60.0, "per_capita_pay": 10.0, "gross_margin": 35.0, "rev_growth": 9.0},
+    "综合": {"per_capita_output": 100.0, "per_capita_pay": 10.0, "gross_margin": 20.0, "rev_growth": 5.0}
+  }
+}

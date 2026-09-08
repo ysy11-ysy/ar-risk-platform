@@ -35,6 +35,10 @@ def schema_block() -> str:
      "top1_customer_ratio": <第一大客户销售占比%,无则 null>,
      "related_sales_ratio": <关联方销售占比%,无则 null>,
      "pledge_ratio": <实控人质押比例%,无则 null>,
+     "top5_customer_sales": <前五大客户销售额合计,万元;年报披露合计金额直接取,未披露则对前五名明细求和,均无则 null>,
+     "new_customer_sales": <本年新增前五大客户的销售额合计,万元(新增=上年未进入前五大或新成立);年报未披露则 null>,
+     "customer_supplier_overlap": <前五大客户与前五大供应商重叠的主体家数;年报明确披露"无重叠"填 0,未披露则 null>,
+     "y_m3_rev": <三年前(审计年度-3)营业收入,万元;取自年报"主要会计数据/近五年主要财务指标"摘要,无则 null>,
      "special_events": "<年报提及的本年度重大特殊事件,如并购/新产能/行业波动/政策/诉讼等,无则空串>"
   }}
 }}"""
@@ -50,7 +54,9 @@ def extract_finance_prompt(annual_text: str, page_hint: str = "") -> tuple:
 3. 优先用「合并资产负债表 / 合并利润表 / 合并现金流量表」;若正文只给了母公司口径,extra 中注明口径差异。
 4. quarter 从年报「分季度主要财务数据」节取;找不到对应季度的填 null;若 Q4 未直接披露,可用全年-前三季推算并在备注说明。
 5. 员工人数取「在职员工的数量合计(人)」,staff_end 为期末、staff_begin 为上年同期/期初。
-6. 只输出一个 JSON 对象,不要输出任何解释文字。字段模板:
+6. 客户与供应商信息从年报「前五名客户情况 / 主要客户 / 前五名供应商情况」节取:top5_customer_sales 有合计金额直接取、否则对披露的前五名客户销售额明细求和;new_customer_sales 只有年报明确说明"新增客户/新增大客户"及其销售额时才填,否则 null;customer_supplier_overlap 只有在前五大客户与前五大供应商名单都披露且能核对重叠时填(无重叠填 0),任一名单缺失则 null。
+7. y_m3_rev 从「主要会计数据 / 近五年主要财务指标」摘要取三年前(审计年度-3)营业收入;找不到该列/该年则 null,不得用更早年份猜测。
+8. 只输出一个 JSON 对象,不要输出任何解释文字。字段模板:
 
 {schema_block()}
 

@@ -10,7 +10,8 @@ from core.fields import ALL_ANNUAL_KEYS, QUARTER_KEYS
 def _pick_year_sections(text: str, budget: int = 90000) -> str:
     """年报全文很长:优先保留三大报表/分季度/员工/特殊事项附近章节再交给模型。"""
     anchors = ["合并资产负债表", "合并利润表", "合并现金流量表", "主要会计数据",
-               "分季度主要财务数据", "员工情况", "母公司资产负债表", "母公司利润表",
+               "分季度主要财务数据", "前五名客户", "前五名供应商", "员工情况",
+               "母公司资产负债表", "母公司利润表",
                "非经常性损益", "前十名股东"]
     parts = []
     for a in anchors:
@@ -48,7 +49,9 @@ def normalize(raw: dict) -> dict:
     for k in QUARTER_KEYS:
         out["quarter"][k] = _num(q.get(k))
     ex = raw.get("extra") or {}
-    for k in ("top5_customer_ratio", "top1_customer_ratio", "related_sales_ratio", "pledge_ratio"):
+    for k in ("top5_customer_ratio", "top1_customer_ratio", "related_sales_ratio",
+              "pledge_ratio", "top5_customer_sales", "new_customer_sales",
+              "customer_supplier_overlap", "y_m3_rev"):
         out["extra"][k] = _num(ex.get(k))
     out["extra"]["special_events"] = str(ex.get("special_events") or "")
     return out

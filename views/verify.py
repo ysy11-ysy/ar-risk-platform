@@ -7,7 +7,10 @@ import json
 
 import streamlit as st
 
+import pandas as pd
+
 import config
+from core import calculator, industry as industry_lib
 from core import report as report_mod
 from core import rules, ui
 from core import verify as verify_core
@@ -26,6 +29,76 @@ if not calc or not calc.get("merged"):
 merged = calc.get("merged")
 flagged = verify_core.flagged_rows(merged)
 
+# ---------------- 待人工补齐/确认项(需外部数据·无法计算不再静默消失) ----------------
+pending_rows = [r for r in merged if r.get("level") in ("需外部数据", "无法计算")]
+_manual = st.session_state.get("manual_fill") or {}
+if pending_rows:
+    st.subheader("⏳ 待人工补齐 / 确认项(机器无法独立判定)")
+    st.caption("以下指标机器无法独立判定(缺历史/外部数据或抽取字段)。先核对『缺口/建议来源』,补录数据后点下方"
+               "「重算」即时给出数值与判定;判定异常项请结合数据来源可信度人工最终确认,录入值随导出 JSON 留档。")
+    pend_df = pd.DataFrame([{
+        "指标": f"{r.get('metric_id') or ''} {r.get('indicator','')}".strip(),
+        "缺口": ("、".join(r.get("missing")) if r.get("missing") else "需外部数据"),
+        "缺什么/建议来源": (r.get("basis") or "")[:90],
+        "当前": r.get("level", ""),
+    } for r in pending_rows])
+    st.dataframe(pend_df, use_container_width=True, hide_index=True)
+
+    miss_keys = []
+    for r in pending_rows:
+        for k in (r.get("missing") or []):
+            if k.startswith("extra.") and k not in miss_keys:
+                miss_keys.append(k)
+    fillable = {}
+    if miss_keys:
+        st.markdown("**录入区(逐项补齐缺失数据)**")
+        for k in miss_keys:
+            short = k[len("extra."):]
+            if short.startswith("ind_"):
+                st.caption(f"· **{k}** 行业基准缺失:请回 ②页「📊 行业基准参照」选择所属行业或录入基准后重新计算(本页不重复录入)。")
+            elif short == "hist_q4_rev_ratio":
+                fillable[k] = st.number_input(
+                    "录入 历史 Q4 收入占比均值(%)", min_value=0.0, max_value=100.0,
+                    value=float(_manual.get(short, 25.0)), format="%.2f", key="fill_hist_q4",
+                    help="前三年(2018-2020)各年 Q4 收入占全年收入的比重取均值;建议来源:Wind/Choice 历史分季度数据"
+                         "或公司定期报告。录入后 m080(历史均值)/m081(当期 Q4 占比偏离)自动重算。")
+            else:
+                st.caption(f"· **{k}** 抽取/录入缺口:请在 ①页 以完整年报重新抽取,或补充该字段后回 ②页 重算;"
+                           f"文本型缺口(客户/供应商名单对比)需人工核对年报原文后补录。")
+    if fillable:
+        if st.button("🔄 按录入值重算(即时给出数值与判定)"):
+            manual = dict(_manual)
+            for k, v in fillable.items():
+                manual[k[len("extra."):]] = v
+            st.session_state["manual_fill"] = manual
+            fin2 = json.loads(json.dumps(st.session_state.get("finance") or {}, ensure_ascii=False, default=str))
+            fin2["extra"] = {**(fin2.get("extra") or {}), **manual}
+            fin2, _ = industry_lib.inject(fin2, (company or {}).get("industry") or "")
+            env = calculator.build_env(fin2)
+            mdefs = {m["id"]: m for m in json.loads(
+                config.METRICS_FILE.read_text(encoding="utf-8")).get("metrics", [])}
+            st.markdown("**重算结果(人工录入后)**")
+            n_bad = 0
+            for r in pending_rows:
+                d0 = mdefs.get(r.get("metric_id") or "")
+                if not d0:
+                    continue
+                still = [kk for kk in (r.get("missing") or [])
+                         if (fin2.get("extra") or {}).get(kk[len("extra."):]) is None]
+                if still:
+                    st.markdown(f"- {d0.get('id')} {d0.get('name','')}:仍缺 {'、'.join(still)} → **无法计算**")
+                    continue
+                val = calculator.eval_expr(d0.get("formula", ""), env)
+                lvl = calculator.judge(d0, val, env) if val is not None else "未触发"
+                if lvl in ("高风险", "关注"):
+                    n_bad += 1
+                icon = {"高风险": "🔴", "关注": "🟠"}.get(lvl, "")
+                st.markdown(f"- {d0.get('id')} {d0.get('name','')}:录入后 = "
+                            f"**{val if val is not None else '—'} {d0.get('unit','')}** → {icon}{ui.chip(lvl)}")
+            if n_bad:
+                st.warning(f"有 **{n_bad}** 项经人工补齐后判定为{'高风险' if n_bad else ''}关注级异常——"
+                           f"请结合数据来源可信度人工最终确认,必要时补充审计程序;该结论不会自动并入上方大模型核验(无年报原文可定位)。")
+
 # 按信号归并显示
 groups = {}
 for r in flagged:
@@ -34,7 +107,10 @@ for r in flagged:
 st.subheader("待核验疑点")
 st.write(f"第 ② 步共筛出 **{len(flagged)}** 条异常指标,归并为 **{len(groups)}** 个信号待核验。")
 if not groups:
-    st.success("本报告范围未发现高风险/关注指标,审核结论:暂未发现明显风险点。")
+    if pending_rows:
+        st.info("本报告范围未发现高风险/关注指标(上方为待人工补齐项);补齐后判定异常的,请结合外部数据人工确认。")
+    else:
+        st.success("本报告范围未发现高风险/关注指标,审核结论:暂未发现明显风险点。")
     st.stop()
 
 kind = st.radio("核验范围", ["全部疑点(高风险+关注)", "仅高风险"], horizontal=True)
@@ -148,7 +224,6 @@ ov = [{
     "原因可否接受": "是" if v.get("acceptable") else "否",
     "最终结论": v.get("verdict", ""),
 } for v in verify_results]
-import pandas as pd
 pdf = pd.DataFrame(ov)
 
 
@@ -211,7 +286,9 @@ if c1.button("📄 生成并下载《风险评估 PDF 报告》", use_container_
 with c2:
     st.session_state["_export_json"] = json.dumps(
         {"company": company, "finance": st.session_state.get("finance"),
-         "calc": calc, "verify": verify_results}, ensure_ascii=False, indent=1, default=str)
+         "calc": calc, "verify": verify_results,
+         "manual_fill": st.session_state.get("manual_fill") or {}},
+        ensure_ascii=False, indent=1, default=str)
     st.download_button("⬇️ 下载原始 JSON(留档/复现)", data=st.session_state["_export_json"],
                        file_name=f"风险审核_数据_{company.get('company','')}.json",
                        mime="application/json")

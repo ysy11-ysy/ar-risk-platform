@@ -1,163 +1,482 @@
 {
-  "demo": true,
-  "company_info": {
-    "company": "华辰智能制造股份有限公司(内置演示样例)",
-    "code": "6000XX",
-    "industry": "制造业",
-    "year": "2023",
-    "source": "演示数据为虚构构造(形态取自典型年报风险案例),正式使用请上传真实年报。"
-  },
-  "finance": {
-    "year": "2023",
-    "company": "华辰智能制造股份有限公司",
-    "unit": "万元",
-    "Y0": {
-      "revenue": 580000, "cost": 438000, "net_profit": 61000, "net_profit_parent": 58500,
-      "deduct_profit": 43000, "sales_expense": 31000, "admin_expense": 26000,
-      "rd_expense": 25000, "finance_expense": 12500,
-      "cfo_net": -9200, "cfo_inflow": 402000, "sales_cash_in": 388000,
-      "staff_cash_out": 52000, "other_op_cash_out": 68500, "buy_goods_cash_out": 345000,
-      "asset_cash_out": 91000, "cash": 98600, "ar": 121000, "adv_receipt": 31000,
-      "other_receivable": 15200, "inventory": 89000, "contract_liab": 21500,
-      "adv_from_customer": 4300, "current_assets": 430000, "current_liab": 310000,
-      "total_assets": 690000, "total_liab": 380000, "fixed_assets": 175000,
-      "cip": 66000, "intangible_assets": 42000, "dev_expenditure": 8000,
-      "goodwill": 25000, "st_loan": 115000, "lt_loan": 42000, "bond_payable": 0,
-      "noncurrent_liab_due": 15000, "equity_total": 310000, "equity_parent": 296000,
-      "restricted_cash": 26000, "bad_allowance": 18500, "credit_loss": 9500,
-      "inventory_loss": 2200, "staff_end": 4100, "staff_begin": 3900
-    },
-    "Y1": {
-      "revenue": 439000, "cost": 347000, "net_profit": 39000, "net_profit_parent": 37200,
-      "deduct_profit": 34000, "sales_expense": 26000, "admin_expense": 22000,
-      "rd_expense": 19500, "finance_expense": 8000,
-      "cfo_net": 28500, "cfo_inflow": 330000, "sales_cash_in": 322000,
-      "staff_cash_out": 41000, "other_op_cash_out": 41000, "buy_goods_cash_out": 300000,
-      "asset_cash_out": 38000, "cash": 82000, "ar": 61000, "adv_receipt": 17000,
-      "other_receivable": 9000, "inventory": 73000, "contract_liab": 20500,
-      "adv_from_customer": 5200, "current_assets": 350000, "current_liab": 240000,
-      "total_assets": 550000, "total_liab": 300000, "fixed_assets": 155000,
-      "cip": 45000, "intangible_assets": 40000, "dev_expenditure": 9000,
-      "goodwill": 25000, "st_loan": 60000, "lt_loan": 35000, "bond_payable": 0,
-      "noncurrent_liab_due": 12000, "equity_total": 250000, "equity_parent": 238000,
-      "restricted_cash": 15000, "bad_allowance": 11000, "credit_loss": 4000,
-      "inventory_loss": 2500, "staff_end": 3900, "staff_begin": 3800
-    },
-    "Y2": {
-      "revenue": 356000, "cost": 282000, "net_profit": 33000, "net_profit_parent": 31800,
-      "deduct_profit": 30000, "sales_expense": 22000, "admin_expense": 19000,
-      "rd_expense": 15000, "finance_expense": 6500,
-      "cfo_net": 26000, "cfo_inflow": 272000, "sales_cash_in": 263000,
-      "staff_cash_out": 36000, "other_op_cash_out": 30000, "buy_goods_cash_out": 246000,
-      "asset_cash_out": 21000, "cash": 70000, "ar": 48000, "adv_receipt": 15000,
-      "other_receivable": 8000, "inventory": 68000, "contract_liab": 18000,
-      "adv_from_customer": 6000, "current_assets": 310000, "current_liab": 210000,
-      "total_assets": 470000, "total_liab": 265000, "fixed_assets": 140000,
-      "cip": 30000, "intangible_assets": 38000, "dev_expenditure": 7000,
-      "goodwill": 25000, "st_loan": 45000, "lt_loan": 30000, "bond_payable": 0,
-      "noncurrent_liab_due": 10000, "equity_total": 205000, "equity_parent": 195000,
-      "restricted_cash": 10000, "bad_allowance": 9000, "credit_loss": 3500,
-      "inventory_loss": 3000, "staff_end": 3800, "staff_begin": 3700
-    },
-    "quarter": {
-      "q1_rev": 105000, "q2_rev": 118000, "q3_rev": 132000, "q4_rev": 225000,
-      "q1_cost": 84000, "q2_cost": 92000, "q3_cost": 98000, "q4_cost": 164000,
-      "next_q1_rev": 126000
-    },
-    "extra": {
-      "top5_customer_ratio": 62, "top1_customer_ratio": 24, "related_sales_ratio": 8,
-      "pledge_ratio": 45,
-      "special_events": "公司解释:第四季度收入集中系行业年底集中验收及二期产线四季度投产放量;应收账款增加系主要客户账期拉长与结算回款滞后;综合毛利率提升系产品结构升级(高毛利新产品收入占比由18%升至31%)及部分原材料价格回落。"
-    }
-  },
-  "machine": [
-    {"risk_id": "R001", "signal_id": "R001-S01", "signal_name": "收入现金流背离", "indicator": "净现比", "value": -0.1508, "unit": "倍", "level": "高风险", "basis": "净现比为负(经营净现金流-9200万/净利润61000万):规则『任意一年为负=高风险』", "source": "machine"},
-    {"risk_id": "R001", "signal_id": "R001-S01", "signal_name": "收入现金流背离", "indicator": "收现比", "value": 0.669, "unit": "倍", "level": "高风险", "basis": "收现比0.67,较上年0.73、前年0.74连续两年下降且<1:规则『<1且连续2年下降=高风险』", "source": "machine"},
-    {"risk_id": "R001", "signal_id": "R001-S01", "signal_name": "收入现金流背离", "indicator": "营收现金含量", "value": 0.693, "unit": "倍", "level": "高风险", "basis": "0.69<0.8且上年0.75<0.8连续两年低于0.8:规则『连续2年<0.8=高风险』", "source": "machine"},
-    {"risk_id": "R001", "signal_id": "R001-S02", "signal_name": "应收账款异常膨胀", "indicator": "应收账款增速差", "value": 66.3, "unit": "个百分点", "level": "高风险", "basis": "应收增速98.4%-营收增速32.1%=66.3pct>30pct:规则『>30个百分点=高风险』", "source": "machine"},
-    {"risk_id": "R001", "signal_id": "R001-S02", "signal_name": "应收账款异常膨胀", "indicator": "应收账款周转天数", "value": 106.2, "unit": "天", "level": "高风险", "basis": "周转天数同比增加约38天且显著高于历史水平:规则『同比增加>30天且高于行业=高风险』", "source": "machine"},
-    {"risk_id": "R001", "signal_id": "R001-S02", "signal_name": "应收账款异常膨胀", "indicator": "DSRI", "value": 1.53, "unit": "倍", "level": "高风险", "basis": "DSRI=1.53>1.5:规则『>1.5=高风险』", "source": "machine"},
-    {"risk_id": "R001", "signal_id": "R001-S08", "signal_name": "期末收入确认异常", "indicator": "Q4收入占比", "value": 38.8, "unit": "%", "level": "关注", "basis": "Q4收入22.5亿/全年58亿=38.8%:规则『30%~40%关注』", "source": "machine"},
-    {"risk_id": "R001", "signal_id": "R001-S08", "signal_name": "期末收入确认异常", "indicator": "Q4收入环比增速", "value": 70.5, "unit": "%", "level": "高风险", "basis": "(Q4 22.5亿-Q3 13.2亿)/Q3=70.5%>50%:规则『>50%且无季节性解释=高风险』", "source": "machine"},
-    {"risk_id": "R001", "signal_id": "R001-S06", "signal_name": "应计利润异常", "indicator": "TATA", "value": 11.6, "unit": "%", "level": "高风险", "basis": "TATA=11.6%>10%且上年6.1%? 机器按连续口径复核,>10%直接标高风险并提示人工复核连续口径", "source": "machine"}
-  ],
-  "llm": [
-    {"risk_id": "R001", "signal_id": "R001-S03", "signal_name": "毛利率异常偏高", "indicator": "毛利率同比变动", "value": 3.5, "unit": "个百分点", "level": "关注", "basis": "毛利率24.5%较上年21.0%上升3.5pct,且高于行业可比中位数约8pct,是否合理需结合产品结构解释核验", "source": "llm"},
-    {"risk_id": "R001", "signal_id": "R001-S04", "signal_name": "收入增长异常", "indicator": "营业收入同比增长率", "value": 32.1, "unit": "%", "level": "关注", "basis": "营收增速32.1%显著高于行业平均增速(约9%),且应收、存货同步高增,增长质量存疑", "source": "llm"},
-    {"risk_id": "R001", "signal_id": "R001-S05", "signal_name": "存货与营收背离", "indicator": "存货周转率同比变动", "value": -0.87, "unit": "次", "level": "关注", "basis": "存货周转率5.2次较上年6.1次下降14.7%,存货增速(21.9%)快于营业成本增速(26.2%?)需结合备货解释", "source": "llm"},
-    {"risk_id": "R002", "signal_id": "R002-S01", "signal_name": "期末收入确认异常", "indicator": "Q4收入占比", "value": 38.8, "unit": "%", "level": "关注", "basis": "四季度占比38.8%、下半年占比61.6%,超过历史同期水平,存在年末集中确认特征", "source": "llm"},
-    {"risk_id": "R003", "signal_id": "R003-S01", "signal_name": "非经常性损益占比", "indicator": "净利润-扣非净利润差占净利润比", "value": 25.4, "unit": "%", "level": "关注", "basis": "归母净利58500万 vs 扣非43000万,非经常性收益占比25.4%,未超过50%红线但需关注明细构成", "source": "llm"}
-  ],
-  "verify": [
-    {
-      "signal_id": "R001-S01", "risk_id": "R001", "signal_name": "收入现金流背离",
-      "indicators": ["净现比", "收现比", "营收现金含量"],
-      "metric_values": {"净现比": "-0.15倍 高风险", "收现比": "0.67倍 高风险", "营收现金含量": "0.69倍 高风险"},
-      "keywords": "净现比;收现比;利润含金量;经营现金流为负;增收不增现",
-      "excerpts": [
-        {"kw": "经营活动产生的现金流量净额", "page": "演示摘录", "ctx": "经营活动产生的现金流量净额较上年同期减少3.77亿元,主要系销售回款减少所致。"},
-        {"kw": "销售回款", "page": "演示摘录", "ctx": "应收账款余额较期初大幅增加,主要系部分大额项目年底集中验收尚未到结算期,销售回款相应滞后。"}
-      ],
-      "suspicious": true,
-      "explanation": "年报解释现金流下降系『销售回款减少、部分大额项目年底集中验收未到结算期』,但未披露应收账款账龄变化与期后回款金额,无法验证『集中验收』与回款滞后幅度(应收增加约6亿元)是否匹配。",
-      "reason_type": "无合理解释",
-      "acceptable": false,
-      "verdict": "确定为风险点",
-      "manual_review": ["函证前五大客户期末应收账款余额及期后回款情况", "核对主要销售合同信用期与实际回款账龄", "核查前五大客户背景,是否为新增或关联主体"],
-      "evidence": "经营活动产生的现金流量净额较上年同期减少3.77亿元,主要系销售回款减少所致。",
-      "source": "demo"
-    },
-    {
-      "signal_id": "R001-S02", "risk_id": "R001", "signal_name": "应收账款异常膨胀",
-      "indicators": ["应收账款增速差", "应收账款周转天数", "DSRI"],
-      "metric_values": {"应收账款增速差": "66.3个百分点 高风险", "应收账款周转天数": "106.2天 高风险", "DSRI": "1.53倍 高风险"},
-      "keywords": "应收账款;坏账准备;账龄;信用政策",
-      "excerpts": [
-        {"kw": "应收账款", "page": "演示摘录", "ctx": "应收账款期末余额12.1亿元,较期初增长98.4%,主要客户为大型国企及行业头部企业,信用状况良好,已按账龄组合计提坏账准备。"},
-        {"kw": "信用政策", "page": "演示摘录", "ctx": "公司对主要客户给予90-180天信用期,报告期内未发生重大信用政策调整。"}
-      ],
-      "suspicious": true,
-      "explanation": "应收账款增速(98.4%)远超营收增速(32.1%),年报仅以『客户信用状况良好』说明,未提供账龄分布、逾期金额或期后回款证据;DSRI=1.53 已越过舞弊识别阈值。",
-      "reason_type": "披露缺陷",
-      "acceptable": false,
-      "verdict": "确定为风险点",
-      "manual_review": ["获取应收账款账龄明细表,核查1年以上占比是否上升", "对期末余额前五名客户发函并追踪回函", "检查坏账准备计提比例与同行业可比公司差异"],
-      "evidence": "应收账款期末余额较期初增长98.4%,主要客户信用状况良好,已按账龄组合计提坏账准备。",
-      "source": "demo"
-    },
-    {
-      "signal_id": "R002-S01", "risk_id": "R002", "signal_name": "期末收入确认异常",
-      "indicators": ["Q4收入占比", "Q4收入环比增速", "下半年收入占比"],
-      "metric_values": {"Q4收入占比": "38.8% 关注", "Q4收入环比增速": "70.5% 高风险", "下半年收入占比": "61.6% 关注"},
-      "keywords": "第四季度;收入确认;年末;集中验收;季节性",
-      "excerpts": [
-        {"kw": "第四季度", "page": "演示摘录", "ctx": "公司主要客户为大型制造企业,项目验收多集中于第四季度,收入确认存在一定季节性特征。"}
-      ],
-      "suspicious": true,
-      "explanation": "年报给出『行业季节性+集中验收』解释,方向合理;但Q4环比增速70.5%显著超过前三季度波动,且未提供四季度验收单/签收单据佐证,无法完全排除期末突击确认。",
-      "reason_type": "季节性或项目性",
-      "acceptable": false,
-      "verdict": "存疑-建议关注",
-      "manual_review": ["抽查第四季度大额销售合同的签收/验收单据与物流记录", "比较同行业公司四季度收入占比验证季节性说法", "核查资产负债表日后是否存在大额销售退回"],
-      "evidence": "公司主要客户项目验收多集中于第四季度,收入确认存在一定季节性特征。",
-      "source": "demo"
-    },
-    {
-      "signal_id": "R001-S03", "risk_id": "R001", "signal_name": "毛利率异常偏高",
-      "indicators": ["毛利率同比变动", "销售毛利率"],
-      "metric_values": {"毛利率同比变动": "+3.5个百分点 关注", "销售毛利率": "24.5%"},
-      "keywords": "毛利率;产品结构;原材料;高毛利产品",
-      "excerpts": [
-        {"kw": "毛利率", "page": "演示摘录", "ctx": "综合毛利率上升主要系产品结构升级,高毛利新产品收入占比由18%提升至31%,同时部分原材料价格回落所致。"}
-      ],
-      "suspicious": true,
-      "explanation": "毛利率上升可由产品结构升级(高毛利新品占比18%→31%)与原材料降价解释,年报披露了量化构成依据,与经营描述一致,原因可接受。",
-      "reason_type": "经营扩张",
-      "acceptable": true,
-      "verdict": "可接受-视为无问题",
-      "manual_review": ["抽查高毛利新产品前十大客户销售真实性", "复核分产品毛利率口径一致性"],
-      "evidence": "综合毛利率上升主要系产品结构升级,高毛利新产品收入占比由18%提升至31%,同时部分原材料价格回落所致。",
-      "source": "demo"
-    }
-  ]
+    "demo":  true,
+    "company_info":  {
+                         "company":  "华辰智能制造股份有限公司(内置演示样例)",
+                         "code":  "6000XX",
+                         "industry":  "制造业",
+                         "year":  "2023",
+                         "source":  "演示数据为虚构构造(形态取自典型年报风险案例),正式使用请上传真实年报。"
+                     },
+    "finance":  {
+                    "year":  "2023",
+                    "company":  "华辰智能制造股份有限公司",
+                    "unit":  "万元",
+                    "Y0":  {
+                               "revenue":  580000,
+                               "cost":  438000,
+                               "net_profit":  61000,
+                               "net_profit_parent":  58500,
+                               "deduct_profit":  43000,
+                               "sales_expense":  31000,
+                               "admin_expense":  26000,
+                               "rd_expense":  25000,
+                               "finance_expense":  12500,
+                               "cfo_net":  -9200,
+                               "cfo_inflow":  402000,
+                               "sales_cash_in":  388000,
+                               "staff_cash_out":  52000,
+                               "other_op_cash_out":  68500,
+                               "buy_goods_cash_out":  345000,
+                               "asset_cash_out":  91000,
+                               "cash":  98600,
+                               "ar":  121000,
+                               "adv_receipt":  31000,
+                               "other_receivable":  15200,
+                               "inventory":  89000,
+                               "contract_liab":  21500,
+                               "adv_from_customer":  4300,
+                               "current_assets":  430000,
+                               "current_liab":  310000,
+                               "total_assets":  690000,
+                               "total_liab":  380000,
+                               "fixed_assets":  175000,
+                               "cip":  66000,
+                               "intangible_assets":  42000,
+                               "dev_expenditure":  8000,
+                               "goodwill":  25000,
+                               "st_loan":  115000,
+                               "lt_loan":  42000,
+                               "bond_payable":  0,
+                               "noncurrent_liab_due":  15000,
+                               "equity_total":  310000,
+                               "equity_parent":  296000,
+                               "restricted_cash":  26000,
+                               "bad_allowance":  18500,
+                               "credit_loss":  9500,
+                               "inventory_loss":  2200,
+                               "staff_end":  4100,
+                               "staff_begin":  3900
+                           },
+                    "Y1":  {
+                               "revenue":  439000,
+                               "cost":  347000,
+                               "net_profit":  39000,
+                               "net_profit_parent":  37200,
+                               "deduct_profit":  34000,
+                               "sales_expense":  26000,
+                               "admin_expense":  22000,
+                               "rd_expense":  19500,
+                               "finance_expense":  8000,
+                               "cfo_net":  28500,
+                               "cfo_inflow":  330000,
+                               "sales_cash_in":  322000,
+                               "staff_cash_out":  41000,
+                               "other_op_cash_out":  41000,
+                               "buy_goods_cash_out":  300000,
+                               "asset_cash_out":  38000,
+                               "cash":  82000,
+                               "ar":  61000,
+                               "adv_receipt":  17000,
+                               "other_receivable":  9000,
+                               "inventory":  73000,
+                               "contract_liab":  20500,
+                               "adv_from_customer":  5200,
+                               "current_assets":  350000,
+                               "current_liab":  240000,
+                               "total_assets":  550000,
+                               "total_liab":  300000,
+                               "fixed_assets":  155000,
+                               "cip":  45000,
+                               "intangible_assets":  40000,
+                               "dev_expenditure":  9000,
+                               "goodwill":  25000,
+                               "st_loan":  60000,
+                               "lt_loan":  35000,
+                               "bond_payable":  0,
+                               "noncurrent_liab_due":  12000,
+                               "equity_total":  250000,
+                               "equity_parent":  238000,
+                               "restricted_cash":  15000,
+                               "bad_allowance":  11000,
+                               "credit_loss":  4000,
+                               "inventory_loss":  2500,
+                               "staff_end":  3900,
+                               "staff_begin":  3800
+                           },
+                    "Y2":  {
+                               "revenue":  356000,
+                               "cost":  282000,
+                               "net_profit":  33000,
+                               "net_profit_parent":  31800,
+                               "deduct_profit":  30000,
+                               "sales_expense":  22000,
+                               "admin_expense":  19000,
+                               "rd_expense":  15000,
+                               "finance_expense":  6500,
+                               "cfo_net":  26000,
+                               "cfo_inflow":  272000,
+                               "sales_cash_in":  263000,
+                               "staff_cash_out":  36000,
+                               "other_op_cash_out":  30000,
+                               "buy_goods_cash_out":  246000,
+                               "asset_cash_out":  21000,
+                               "cash":  70000,
+                               "ar":  48000,
+                               "adv_receipt":  15000,
+                               "other_receivable":  8000,
+                               "inventory":  68000,
+                               "contract_liab":  18000,
+                               "adv_from_customer":  6000,
+                               "current_assets":  310000,
+                               "current_liab":  210000,
+                               "total_assets":  470000,
+                               "total_liab":  265000,
+                               "fixed_assets":  140000,
+                               "cip":  30000,
+                               "intangible_assets":  38000,
+                               "dev_expenditure":  7000,
+                               "goodwill":  25000,
+                               "st_loan":  45000,
+                               "lt_loan":  30000,
+                               "bond_payable":  0,
+                               "noncurrent_liab_due":  10000,
+                               "equity_total":  205000,
+                               "equity_parent":  195000,
+                               "restricted_cash":  10000,
+                               "bad_allowance":  9000,
+                               "credit_loss":  3500,
+                               "inventory_loss":  3000,
+                               "staff_end":  3800,
+                               "staff_begin":  3700
+                           },
+                    "quarter":  {
+                                    "q1_rev":  105000,
+                                    "q2_rev":  118000,
+                                    "q3_rev":  132000,
+                                    "q4_rev":  225000,
+                                    "q1_cost":  84000,
+                                    "q2_cost":  92000,
+                                    "q3_cost":  98000,
+                                    "q4_cost":  164000,
+                                    "next_q1_rev":  126000
+                                },
+                    "extra":  {
+                                  "top5_customer_ratio":  62,
+                                  "top1_customer_ratio":  24,
+                                  "related_sales_ratio":  8,
+                                  "pledge_ratio":  45,
+                                  "special_events":  "公司解释:第四季度收入集中系行业年底集中验收及二期产线四季度投产放量;应收账款增加系主要客户账期拉长与结算回款滞后;综合毛利率提升系产品结构升级(高毛利新产品收入占比由18%升至31%)及部分原材料价格回落。",
+                                  "top5_customer_sales":  359600,
+                                  "new_customer_sales":  30000,
+                                  "customer_supplier_overlap":  0,
+                                  "y_m3_rev":  300000
+                              }
+                },
+    "machine":  [
+                    {
+                        "risk_id":  "R001",
+                        "signal_id":  "R001-S01",
+                        "signal_name":  "收入现金流背离",
+                        "indicator":  "净现比",
+                        "value":  -0.1508,
+                        "unit":  "倍",
+                        "level":  "高风险",
+                        "basis":  "净现比为负(经营净现金流-9200万/净利润61000万):规则『任意一年为负=高风险』",
+                        "source":  "machine"
+                    },
+                    {
+                        "risk_id":  "R001",
+                        "signal_id":  "R001-S01",
+                        "signal_name":  "收入现金流背离",
+                        "indicator":  "收现比",
+                        "value":  0.669,
+                        "unit":  "倍",
+                        "level":  "高风险",
+                        "basis":  "收现比0.67,较上年0.73、前年0.74连续两年下降且\u003c1:规则『\u003c1且连续2年下降=高风险』",
+                        "source":  "machine"
+                    },
+                    {
+                        "risk_id":  "R001",
+                        "signal_id":  "R001-S01",
+                        "signal_name":  "收入现金流背离",
+                        "indicator":  "营收现金含量",
+                        "value":  0.693,
+                        "unit":  "倍",
+                        "level":  "高风险",
+                        "basis":  "0.69\u003c0.8且上年0.75\u003c0.8连续两年低于0.8:规则『连续2年\u003c0.8=高风险』",
+                        "source":  "machine"
+                    },
+                    {
+                        "risk_id":  "R001",
+                        "signal_id":  "R001-S02",
+                        "signal_name":  "应收账款异常膨胀",
+                        "indicator":  "应收账款增速差",
+                        "value":  66.3,
+                        "unit":  "个百分点",
+                        "level":  "高风险",
+                        "basis":  "应收增速98.4%-营收增速32.1%=66.3pct\u003e30pct:规则『\u003e30个百分点=高风险』",
+                        "source":  "machine"
+                    },
+                    {
+                        "risk_id":  "R001",
+                        "signal_id":  "R001-S02",
+                        "signal_name":  "应收账款异常膨胀",
+                        "indicator":  "应收账款周转天数",
+                        "value":  106.2,
+                        "unit":  "天",
+                        "level":  "高风险",
+                        "basis":  "周转天数同比增加约38天且显著高于历史水平:规则『同比增加\u003e30天且高于行业=高风险』",
+                        "source":  "machine"
+                    },
+                    {
+                        "risk_id":  "R001",
+                        "signal_id":  "R001-S02",
+                        "signal_name":  "应收账款异常膨胀",
+                        "indicator":  "DSRI",
+                        "value":  1.53,
+                        "unit":  "倍",
+                        "level":  "高风险",
+                        "basis":  "DSRI=1.53\u003e1.5:规则『\u003e1.5=高风险』",
+                        "source":  "machine"
+                    },
+                    {
+                        "risk_id":  "R001",
+                        "signal_id":  "R001-S08",
+                        "signal_name":  "期末收入确认异常",
+                        "indicator":  "Q4收入占比",
+                        "value":  38.8,
+                        "unit":  "%",
+                        "level":  "关注",
+                        "basis":  "Q4收入22.5亿/全年58亿=38.8%:规则『30%~40%关注』",
+                        "source":  "machine"
+                    },
+                    {
+                        "risk_id":  "R001",
+                        "signal_id":  "R001-S08",
+                        "signal_name":  "期末收入确认异常",
+                        "indicator":  "Q4收入环比增速",
+                        "value":  70.5,
+                        "unit":  "%",
+                        "level":  "高风险",
+                        "basis":  "(Q4 22.5亿-Q3 13.2亿)/Q3=70.5%\u003e50%:规则『\u003e50%且无季节性解释=高风险』",
+                        "source":  "machine"
+                    },
+                    {
+                        "risk_id":  "R001",
+                        "signal_id":  "R001-S06",
+                        "signal_name":  "应计利润异常",
+                        "indicator":  "TATA",
+                        "value":  11.6,
+                        "unit":  "%",
+                        "level":  "高风险",
+                        "basis":  "TATA=11.6%\u003e10%且上年6.1%? 机器按连续口径复核,\u003e10%直接标高风险并提示人工复核连续口径",
+                        "source":  "machine"
+                    }
+                ],
+    "llm":  [
+                {
+                    "risk_id":  "R001",
+                    "signal_id":  "R001-S03",
+                    "signal_name":  "毛利率异常偏高",
+                    "indicator":  "毛利率同比变动",
+                    "value":  3.5,
+                    "unit":  "个百分点",
+                    "level":  "关注",
+                    "basis":  "毛利率24.5%较上年21.0%上升3.5pct,且高于行业可比中位数约8pct,是否合理需结合产品结构解释核验",
+                    "source":  "llm"
+                },
+                {
+                    "risk_id":  "R001",
+                    "signal_id":  "R001-S04",
+                    "signal_name":  "收入增长异常",
+                    "indicator":  "营业收入同比增长率",
+                    "value":  32.1,
+                    "unit":  "%",
+                    "level":  "关注",
+                    "basis":  "营收增速32.1%显著高于行业平均增速(约9%),且应收、存货同步高增,增长质量存疑",
+                    "source":  "llm"
+                },
+                {
+                    "risk_id":  "R001",
+                    "signal_id":  "R001-S05",
+                    "signal_name":  "存货与营收背离",
+                    "indicator":  "存货周转率同比变动",
+                    "value":  -0.87,
+                    "unit":  "次",
+                    "level":  "关注",
+                    "basis":  "存货周转率5.2次较上年6.1次下降14.7%,存货增速(21.9%)快于营业成本增速(26.2%?)需结合备货解释",
+                    "source":  "llm"
+                },
+                {
+                    "risk_id":  "R002",
+                    "signal_id":  "R002-S01",
+                    "signal_name":  "期末收入确认异常",
+                    "indicator":  "Q4收入占比",
+                    "value":  38.8,
+                    "unit":  "%",
+                    "level":  "关注",
+                    "basis":  "四季度占比38.8%、下半年占比61.6%,超过历史同期水平,存在年末集中确认特征",
+                    "source":  "llm"
+                },
+                {
+                    "risk_id":  "R003",
+                    "signal_id":  "R003-S01",
+                    "signal_name":  "非经常性损益占比",
+                    "indicator":  "净利润-扣非净利润差占净利润比",
+                    "value":  25.4,
+                    "unit":  "%",
+                    "level":  "关注",
+                    "basis":  "归母净利58500万 vs 扣非43000万,非经常性收益占比25.4%,未超过50%红线但需关注明细构成",
+                    "source":  "llm"
+                }
+            ],
+    "verify":  [
+                   {
+                       "signal_id":  "R001-S01",
+                       "risk_id":  "R001",
+                       "signal_name":  "收入现金流背离",
+                       "indicators":  [
+                                          "净现比",
+                                          "收现比",
+                                          "营收现金含量"
+                                      ],
+                       "metric_values":  {
+                                             "净现比":  "-0.15倍 高风险",
+                                             "收现比":  "0.67倍 高风险",
+                                             "营收现金含量":  "0.69倍 高风险"
+                                         },
+                       "keywords":  "净现比;收现比;利润含金量;经营现金流为负;增收不增现",
+                       "excerpts":  [
+                                        {
+                                            "kw":  "经营活动产生的现金流量净额",
+                                            "page":  "演示摘录",
+                                            "ctx":  "经营活动产生的现金流量净额较上年同期减少3.77亿元,主要系销售回款减少所致。"
+                                        },
+                                        {
+                                            "kw":  "销售回款",
+                                            "page":  "演示摘录",
+                                            "ctx":  "应收账款余额较期初大幅增加,主要系部分大额项目年底集中验收尚未到结算期,销售回款相应滞后。"
+                                        }
+                                    ],
+                       "suspicious":  true,
+                       "explanation":  "年报解释现金流下降系『销售回款减少、部分大额项目年底集中验收未到结算期』,但未披露应收账款账龄变化与期后回款金额,无法验证『集中验收』与回款滞后幅度(应收增加约6亿元)是否匹配。",
+                       "reason_type":  "无合理解释",
+                       "acceptable":  false,
+                       "verdict":  "确定为风险点",
+                       "manual_review":  [
+                                             "函证前五大客户期末应收账款余额及期后回款情况",
+                                             "核对主要销售合同信用期与实际回款账龄",
+                                             "核查前五大客户背景,是否为新增或关联主体"
+                                         ],
+                       "evidence":  "经营活动产生的现金流量净额较上年同期减少3.77亿元,主要系销售回款减少所致。",
+                       "source":  "demo"
+                   },
+                   {
+                       "signal_id":  "R001-S02",
+                       "risk_id":  "R001",
+                       "signal_name":  "应收账款异常膨胀",
+                       "indicators":  [
+                                          "应收账款增速差",
+                                          "应收账款周转天数",
+                                          "DSRI"
+                                      ],
+                       "metric_values":  {
+                                             "应收账款增速差":  "66.3个百分点 高风险",
+                                             "应收账款周转天数":  "106.2天 高风险",
+                                             "DSRI":  "1.53倍 高风险"
+                                         },
+                       "keywords":  "应收账款;坏账准备;账龄;信用政策",
+                       "excerpts":  [
+                                        {
+                                            "kw":  "应收账款",
+                                            "page":  "演示摘录",
+                                            "ctx":  "应收账款期末余额12.1亿元,较期初增长98.4%,主要客户为大型国企及行业头部企业,信用状况良好,已按账龄组合计提坏账准备。"
+                                        },
+                                        {
+                                            "kw":  "信用政策",
+                                            "page":  "演示摘录",
+                                            "ctx":  "公司对主要客户给予90-180天信用期,报告期内未发生重大信用政策调整。"
+                                        }
+                                    ],
+                       "suspicious":  true,
+                       "explanation":  "应收账款增速(98.4%)远超营收增速(32.1%),年报仅以『客户信用状况良好』说明,未提供账龄分布、逾期金额或期后回款证据;DSRI=1.53 已越过舞弊识别阈值。",
+                       "reason_type":  "披露缺陷",
+                       "acceptable":  false,
+                       "verdict":  "确定为风险点",
+                       "manual_review":  [
+                                             "获取应收账款账龄明细表,核查1年以上占比是否上升",
+                                             "对期末余额前五名客户发函并追踪回函",
+                                             "检查坏账准备计提比例与同行业可比公司差异"
+                                         ],
+                       "evidence":  "应收账款期末余额较期初增长98.4%,主要客户信用状况良好,已按账龄组合计提坏账准备。",
+                       "source":  "demo"
+                   },
+                   {
+                       "signal_id":  "R002-S01",
+                       "risk_id":  "R002",
+                       "signal_name":  "期末收入确认异常",
+                       "indicators":  [
+                                          "Q4收入占比",
+                                          "Q4收入环比增速",
+                                          "下半年收入占比"
+                                      ],
+                       "metric_values":  {
+                                             "Q4收入占比":  "38.8% 关注",
+                                             "Q4收入环比增速":  "70.5% 高风险",
+                                             "下半年收入占比":  "61.6% 关注"
+                                         },
+                       "keywords":  "第四季度;收入确认;年末;集中验收;季节性",
+                       "excerpts":  [
+                                        {
+                                            "kw":  "第四季度",
+                                            "page":  "演示摘录",
+                                            "ctx":  "公司主要客户为大型制造企业,项目验收多集中于第四季度,收入确认存在一定季节性特征。"
+                                        }
+                                    ],
+                       "suspicious":  true,
+                       "explanation":  "年报给出『行业季节性+集中验收』解释,方向合理;但Q4环比增速70.5%显著超过前三季度波动,且未提供四季度验收单/签收单据佐证,无法完全排除期末突击确认。",
+                       "reason_type":  "季节性或项目性",
+                       "acceptable":  false,
+                       "verdict":  "存疑-建议关注",
+                       "manual_review":  [
+                                             "抽查第四季度大额销售合同的签收/验收单据与物流记录",
+                                             "比较同行业公司四季度收入占比验证季节性说法",
+                                             "核查资产负债表日后是否存在大额销售退回"
+                                         ],
+                       "evidence":  "公司主要客户项目验收多集中于第四季度,收入确认存在一定季节性特征。",
+                       "source":  "demo"
+                   },
+                   {
+                       "signal_id":  "R001-S03",
+                       "risk_id":  "R001",
+                       "signal_name":  "毛利率异常偏高",
+                       "indicators":  [
+                                          "毛利率同比变动",
+                                          "销售毛利率"
+                                      ],
+                       "metric_values":  {
+                                             "毛利率同比变动":  "+3.5个百分点 关注",
+                                             "销售毛利率":  "24.5%"
+                                         },
+                       "keywords":  "毛利率;产品结构;原材料;高毛利产品",
+                       "excerpts":  [
+                                        {
+                                            "kw":  "毛利率",
+                                            "page":  "演示摘录",
+                                            "ctx":  "综合毛利率上升主要系产品结构升级,高毛利新产品收入占比由18%提升至31%,同时部分原材料价格回落所致。"
+                                        }
+                                    ],
+                       "suspicious":  true,
+                       "explanation":  "毛利率上升可由产品结构升级(高毛利新品占比18%→31%)与原材料降价解释,年报披露了量化构成依据,与经营描述一致,原因可接受。",
+                       "reason_type":  "经营扩张",
+                       "acceptable":  true,
+                       "verdict":  "可接受-视为无问题",
+                       "manual_review":  [
+                                             "抽查高毛利新产品前十大客户销售真实性",
+                                             "复核分产品毛利率口径一致性"
+                                         ],
+                       "evidence":  "综合毛利率上升主要系产品结构升级,高毛利新产品收入占比由18%提升至31%,同时部分原材料价格回落所致。",
+                       "source":  "demo"
+                   }
+               ]
 }
