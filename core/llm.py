@@ -1,0 +1,158 @@
+# -*- coding: utf-8 -*-
+"""大模型客户端:统一封装智谱 / 通义 / DeepSeek / OpenAI 兼容接口。
+
+- chat_text(): 返回纯文本
+- chat_json(): 请求 JSON 输出并容错解析(容忍 ```json 代码块、前后杂文)
+- demo_result(): 演示模式下返回 False,由上层走内置演示数据
+
+性能/稳定性设计:
+1. 全局并发闸(_gate):同一时刻全站(所有访客会话)最多 LLM_GLOBAL_CONCURRENCY
+   路请求,超出自动排队 —— 多人同时点计算时不会一起轰炸 API 触发限流;
+2. 结果磁盘缓存:相同 system/user prompt 的结果落盘复用(同公司同数据
+   只调一次 API),跨会话、跨访客秒回;LLM_CACHE_DISABLE=1 可关闭。
+"""
+import json
+import os
+import re
+import threading
+import time
+
+import requests
+
+import config
+from core import cache as disk_cache
+
+
+class LLMNotConfigured(Exception):
+    pass
+
+
+_GATE = None
+_GATE_LOCK = threading.Lock()
+
+
+def _gate():
+    """全站共享的大模型并发闸(BoundedSemaphore),所有会话共用同一实例。"""
+    global _GATE
+    if _GATE is None:
+        with _GATE_LOCK:
+            if _GATE is None:
+                _GATE = threading.BoundedSemaphore(config.llm_global_concurrency())
+    return _GATE
+
+
+def _headers(key: str) -> dict:
+    return {"Authorization": f"Bearer {key}", "Content-Type": "application/json"}
+
+
+def _post(base_url: str, key: str, model: str, messages: list, temperature: float,
+          timeout: int = 600, max_tokens: int = 16000):
+    url = base_url.rstrip("/") + "/chat/completions"
+    payload = {
+        "model": model,
+        "messages": messages,
+        "temperature": temperature,
+        "max_tokens": max_tokens,
+    }
+    for attempt in range(3):
+        try:
+            resp = requests.post(url, headers=_headers(key), json=payload, timeout=timeout)
+        except requests.RequestException as e:  # 网络错误:等待重试
+            if attempt < 2:
+                time.sleep(2 + attempt * 3)
+                continue
+            raise LLMNotConfigured(f"网络请求失败: {e}") from e
+        if resp.status_code == 429 or resp.status_code >= 500:
+            if attempt < 2:
+                time.sleep(3 + attempt * 5)
+                continue
+        if resp.status_code != 200:
+            raise RuntimeError(f"LLM 接口返回 {resp.status_code}: {resp.text[:400]}")
+        data = resp.json()
+        try:
+            return data["choices"][0]["message"]["content"]
+        except (KeyError, IndexError) as e:
+            raise RuntimeError(f"LLM 返回格式异常: {str(data)[:300]}") from e
+    raise RuntimeError("LLM 请求重试后仍失败")
+
+
+def _messages(system: str, user: str):
+    return [{"role": "system", "content": system}, {"role": "user", "content": user}]
+
+
+def chat_text(system: str, user: str, temperature: float = 0.3) -> str:
+    provider, base, key, model = config.llm_settings()
+    if not key:
+        raise LLMNotConfigured("未配置大模型 API Key(见 .env)")
+    # 结果磁盘缓存:同一 prompt 只调一次 API(跨会话/跨访客秒回)
+    ck = None
+    if config.llm_cache_enabled():
+        ck = disk_cache.key_of("chat_text", provider, model, temperature, system, user)
+        hit = disk_cache.get("llm", ck, ttl_days=config.llm_cache_ttl_days())
+        if hit is not None:
+            return hit
+    # 全局并发闸:全站排队,避免多会话同时轰炸 API
+    with _gate():
+        text = _post(base, key, model, _messages(system, user), temperature)
+    if ck is not None:
+        try:
+            disk_cache.put("llm", ck, text, ttl_days=config.llm_cache_ttl_days())
+        except Exception:
+            pass
+    return text
+
+
+def chat_json(system: str, user: str, temperature: float = 0.1):
+    """请求并解析 JSON。"""
+    text = chat_text(system, user, temperature)
+    return parse_json(text)
+
+
+def _json_candidates(t: str):
+    """生成多种可能可解析的候选 JSON 字符串,依次尝试。"""
+    t = (t or "").strip()
+    # 全角引号/括号/逗号/冒号/负号 -> 半角(模型偶尔输出中文标点)
+    conv = t.translate(str.maketrans({"‘": "'", "’": "'", "“": '"', "”": '"',
+                                      "，": ",", "：": ":", "；": ";",
+                                      "｛": "{", "｝": "}", "［": "[", "］": "]",
+                                      "【": "[", "】": "]", "－": "-", "～": "~"}))
+    for base in {t, conv}:
+        yield base
+        # 去掉对象/数组内残留的尾逗号
+        norm = re.sub(r",\s*([}\]])", r"\1", base)
+        if norm != base:
+            yield norm
+        # 首尾可能有说明文字:取首个 { 或 [ 到最后一个 } 或 ]
+        opens = [i for i, ch in enumerate(base) if ch in "{["]
+        closes = [i for i, ch in enumerate(base) if ch in "}]"]
+        if opens and closes and opens[0] < closes[-1]:
+            sub = base[opens[0]: closes[-1] + 1]
+            yield sub
+            yield re.sub(r",\s*([}\]])", r"\1", sub)
+
+
+def parse_json(text: str):
+    """容错解析模型输出中的 JSON:容忍 ```json 代码块、首尾说明文字、BOM、尾逗号、全角标点。
+
+    全部候选都失败时抛 ValueError,并附原始文本便于定位。
+    """
+    raw = text or ""
+    t = raw.strip().lstrip("\ufeff").strip()
+    if t.startswith("```"):
+        t = re.sub(r"^```[a-zA-Z]*\s*", "", t)
+        t = re.sub(r"\s*```$", "", t).strip()
+    for cand in _json_candidates(t):
+        if not cand:
+            continue
+        try:
+            return json.loads(cand)
+        except Exception:
+            continue
+    raise ValueError(f"模型未返回合法 JSON:\n{raw[:800]}")
+
+
+def strip_code_block(text: str) -> str:
+    t = (text or "").strip()
+    t = re.sub(r"^```[a-zA-Z]*\s*", "", t)
+    t = re.sub(r"\s*```$", "", t)
+    return t.strip()

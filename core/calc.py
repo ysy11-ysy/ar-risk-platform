@@ -43,25 +43,85 @@ if sel_risks:
 elif sel_cats:
     risk_ids = [r["id"] for r in risk_all if r.get("category") in sel_cats]
 
+
+def _show_machine_preview(rows: list):
+    """机器轨结果即时渲染:让用户在等待大模型期间先看到图表与疑点清单。"""
+    st.markdown("#### ① 数值硬规则引擎结果(本地即时计算,已完成)")
+    from collections import Counter
+    cnt = Counter(r.get("level", "未知") for r in rows)
+    if not rows:
+        st.info("所选范围内没有可机器计算的指标(可能全部依赖外部数据,将由大模型处理)。")
+        return
+    order = ["高风险", "关注", "正常", "未触发", "需外部数据"]
+    m1, m2, m3, m4 = st.columns(4)
+    m1.metric("机器计算指标数", len(rows))
+    m2.metric("高风险(红)", cnt.get("高风险", 0))
+    m3.metric("关注(橙)", cnt.get("关注", 0))
+    m4.metric("需外部数据", cnt.get("需外部数据", 0))
+    dist = pd.DataFrame({"判定": order, "数量": [cnt.get(k, 0) for k in order]})
+    st.bar_chart(dist.set_index("判定"), color="#1f4e8c", height=200)
+    flagged = [r for r in rows if r.get("level") in ("高风险", "关注")]
+    if flagged:
+        pre = pd.DataFrame([{
+            "信号": f"{r.get('signal_id')}",
+            "指标": r.get("indicator", ""),
+            "计算值": f"{r.get('value') if r.get('value') is not None else '—'} {r.get('unit','')}".strip(),
+            "判定": r.get("level", ""),
+        } for r in sorted(flagged, key=lambda r: (r.get("level") != "高风险",
+                                                  r.get("risk_id", ""),
+                                                  r.get("signal_id", "")))])
+        st.dataframe(pre, use_container_width=True, hide_index=True)
+    st.caption("以上为本地数值硬规则即时结果;大模型全量计算在下方执行,进度实时更新。")
+
 calc = st.session_state.get("calc_result")
 
+force_recalc = st.checkbox("🔁 强制重新计算(不复用同参数缓存)", value=False,
+                           help="默认:同一会话、同一财务数据与风险范围将直接复用上次计算结果,"
+                                "避免重复调用大模型耗时;勾选后忽略缓存完整重跑。")
+
 if st.button("⚙️ 开始计算指标(机器硬规则 + 大模型全量)", type="primary"):
+    scope = json.dumps({"finance": fin, "risk_ids": risk_ids,
+                        "company": (company or {}).get("company"),
+                        "year": (company or {}).get("year"),
+                        "is_demo": bool(st.session_state.get("is_demo"))},
+                       ensure_ascii=False, sort_keys=True, default=str)
+    prev = st.session_state.get("calc_result")
+    if not force_recalc and prev and prev.get("_scope") == scope:
+        st.success("计算参数与上次一致,已直接复用上次计算结果"
+                   "(如需重跑请勾选「🔁 强制重新计算」)。")
+        st.rerun()
     st.session_state.pop("verify_results", None)
-    bar = st.progress(0.0, text="准备计算…")
+
+    # ---- 1) 机器硬规则先行(本地毫秒级):立刻出图表,不等大模型 ----
+    bar = st.progress(0.0, text="正在运行数值硬规则引擎…")
+    machine = calculator.run_machine(fin, risk_ids)
+    _show_machine_preview(machine)
+
+    # ---- 2) 大模型全量计算(逐批推进,进度实时更新;相同数据命中缓存秒回)----
     if st.session_state.get("is_demo"):
         # 演示公司:机器实算 + 内置演示 LLM 结果合并
-        machine = calculator.run_machine(fin, risk_ids)
         from core.ui import demo_company
         demo_llm = demo_company().get("llm", [])
         calc = {"machine": machine, "llm": demo_llm,
                 "merged": verify_core.merge_rows(machine, demo_llm), "llm_used": False,
-                "demo": True}
+                "demo": True, "_scope": scope}
         bar.progress(1.0, text="完成")
         st.session_state["calc_result"] = calc
     elif verify_core.llm_ok():
-        calc = verify_core.step2_calc(fin, risk_ids,
-                                      progress=lambda msg: bar.progress(0.0, text=msg))
-        bar.progress(1.0, text="完成")
+        import time as _t
+        t0 = _t.time()
+
+        def _cb(done, total, note):
+            frac = (done / total) if total else 1.0
+            eta = ""
+            if done > 0:
+                eta_s = (_t.time() - t0) / done * max(total - done, 0)
+                eta = f",预计还需约 {eta_s / 60:.1f} 分钟"
+            bar.progress(frac, text=f"{note}{eta}")
+
+        calc = verify_core.step2_calc(fin, risk_ids, progress=_cb)
+        calc["_scope"] = scope
+        bar.progress(1.0, text="大模型全量计算完成,正在合并双轨结果…")
         st.session_state["calc_result"] = calc
     else:
         st.error("当前未配置可用的真实大模型(需要 .env 中配置 Key 且 DEMO_MODE=false),且本次会话不是演示公司。可选:"
@@ -77,6 +137,12 @@ if not calc:
 merged = calc.get("merged") or []
 if calc.get("demo"):
     st.info("当前结果为【离线演示】:机器硬规则实时计算 + 内置演示公司的大模型计算结果(红/橙色为异常项)。")
+if calc.get("errors"):
+    _err_ids = ["/".join(e.get("batch") or []) for e in calc["errors"][:5]]
+    st.warning(f"本次大模型计算有 **{len(calc['errors'])} 个批次未完成**(限流或网络原因:"
+               f"{'、'.join(_err_ids)})。已成功的批次结果已保留并缓存——"
+               f"直接再次点击上方「开始计算」即可**续跑缺失批次,已完成部分秒回不重算**;"
+               f"若反复失败请减少所选风险范围或稍后再试。")
 if not merged:
     st.warning("所选范围内没有可计算指标,请放宽选择。")
     st.stop()
