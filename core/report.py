@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-"""风险评估 PDF 报告导出(reportlab)。未安装 reportlab 或找不到中文字体时抛出可读错误。"""
+"""风险评估 PDF 报告导出(reportlab)。中文字体:本机 .ttf 优先,兜底用内置 STSong-Light CID 字体,跨平台(含 Streamlit Cloud)可导出中文。"""
 import io
 import os
 from datetime import datetime
@@ -8,18 +8,38 @@ LEVEL_COLOR = {"高风险": "#c0392b", "关注": "#e67e22", "正常": "#27ae60",
                "可接受-视为无问题": "#27ae60", "存疑-建议关注": "#e67e22", "确定为风险点": "#c0392b"}
 
 
-def _find_cjk_font() -> str:
+def _register_cjk_font() -> str:
+    """注册中文字体并返回字体名。
+
+    优先用本机“单字体”文件(.ttf/.otf，黑体/仿宋/楷体等)；找不到时回退到
+    reportlab 内置的 Adobe 简体中文 CID 字体 STSong-Light——它不依赖任何外部
+    字体文件，跨平台(含 Streamlit Cloud 的 Linux 容器)均可正常导出中文。
+    """
+    from reportlab.pdfbase import pdfmetrics
+    from reportlab.pdfbase.cidfonts import UnicodeCIDFont
+    from reportlab.pdfbase.ttfonts import TTFont
+
+    # 只列“单字体”文件：reportlab 的 TTFont 对 .ttc(字体集合)加载不稳定，
+    # 可能注册出“无字形”的假字体导致 PDF 中文空白，故 .ttc 一律不在此列。
     candidates = [
-        r"C:\Windows\Fonts\msyh.ttc", r"C:\Windows\Fonts\msyhbd.ttc",
-        r"C:\Windows\Fonts\simhei.ttf", r"C:\Windows\Fonts\simsun.ttc",
-        "/usr/share/fonts/opentype/noto/NotoSansCJK-Regular.ttc",
-        "/usr/share/fonts/truetype/wqy/wqy-microhei.ttc",
-        "/System/Library/Fonts/PingFang.ttc",
+        r"C:\Windows\Fonts\simhei.ttf",   # 黑体
+        r"C:\Windows\Fonts\simfang.ttf",  # 仿宋
+        r"C:\Windows\Fonts\simkai.ttf",   # 楷体
+        "/usr/share/fonts/opentype/noto/NotoSansCJK-Regular.ttf",
+        "/usr/share/fonts/truetype/noto/NotoSansCJK-Regular.ttf",
+        "/usr/share/fonts/truetype/wqy/wqy-zenhei.ttf",
     ]
-    for c in candidates:
-        if os.path.exists(c):
-            return c
-    return ""
+    for path in candidates:
+        if os.path.exists(path):
+            try:
+                pdfmetrics.registerFont(TTFont("CJK", path))
+                return "CJK"
+            except Exception:
+                continue
+
+    # 兜底：reportlab 自带 CID 字体，无需任何字体文件，PDF 阅读器均可正常显示中文
+    pdfmetrics.registerFont(UnicodeCIDFont("STSong-Light"))
+    return "STSong-Light"
 
 
 def export_pdf(company_info: dict, calc_merged: list, verify_results: list, rule_summary: str = "") -> bytes:
@@ -27,19 +47,14 @@ def export_pdf(company_info: dict, calc_merged: list, verify_results: list, rule
     from reportlab.lib.pagesizes import A4
     from reportlab.lib.styles import ParagraphStyle
     from reportlab.lib.units import mm
-    from reportlab.pdfbase import pdfmetrics
-    from reportlab.pdfbase.ttfonts import TTFont
     from reportlab.platypus import (Paragraph, SimpleDocTemplate, Spacer, Table, TableStyle)
 
-    font_path = _find_cjk_font()
-    if not font_path:
-        raise RuntimeError("未找到中文字体,无法导出中文 PDF(Windows 应存在 C:\\Windows\\Fonts\\msyh.ttc)。")
-    pdfmetrics.registerFont(TTFont("CJK", font_path))
+    font_name = _register_cjk_font()
 
-    st_title = ParagraphStyle("t", fontName="CJK", fontSize=16, leading=22, alignment=1, spaceAfter=6)
-    st_h = ParagraphStyle("h", fontName="CJK", fontSize=11.5, leading=16, spaceBefore=8, spaceAfter=4)
-    st_b = ParagraphStyle("b", fontName="CJK", fontSize=9, leading=13)
-    st_small = ParagraphStyle("s", fontName="CJK", fontSize=8, leading=11)
+    st_title = ParagraphStyle("t", fontName=font_name, fontSize=16, leading=22, alignment=1, spaceAfter=6)
+    st_h = ParagraphStyle("h", fontName=font_name, fontSize=11.5, leading=16, spaceBefore=8, spaceAfter=4)
+    st_b = ParagraphStyle("b", fontName=font_name, fontSize=9, leading=13)
+    st_small = ParagraphStyle("s", fontName=font_name, fontSize=8, leading=11)
 
     buf = io.BytesIO()
     doc = SimpleDocTemplate(buf, pagesize=A4, topMargin=14 * mm, bottomMargin=12 * mm,
@@ -67,7 +82,7 @@ def export_pdf(company_info: dict, calc_merged: list, verify_results: list, rule
                          r.get("level", ""), (r.get("basis") or "")[:46]])
         t = Table(data, colWidths=[14 * mm, 20 * mm, 34 * mm, 22 * mm, 16 * mm, 76 * mm], repeatRows=1)
         t.setStyle(TableStyle([
-            ("FONTNAME", (0, 0), (-1, -1), "CJK"),
+            ("FONTNAME", (0, 0), (-1, -1), font_name),
             ("FONTSIZE", (0, 0), (-1, -1), 7.5),
             ("GRID", (0, 0), (-1, -1), 0.4, colors.HexColor("#b9c6d6")),
             ("BACKGROUND", (0, 0), (-1, 0), colors.HexColor("#1f4e8c")),
@@ -99,7 +114,7 @@ def export_pdf(company_info: dict, calc_merged: list, verify_results: list, rule
             ])
         t = Table(data, colWidths=[16 * mm, 24 * mm, 40 * mm, 18 * mm, 14 * mm, 26 * mm, 44 * mm], repeatRows=1)
         t.setStyle(TableStyle([
-            ("FONTNAME", (0, 0), (-1, -1), "CJK"), ("FONTSIZE", (0, 0), (-1, -1), 7),
+            ("FONTNAME", (0, 0), (-1, -1), font_name), ("FONTSIZE", (0, 0), (-1, -1), 7),
             ("GRID", (0, 0), (-1, -1), 0.4, colors.HexColor("#b9c6d6")),
             ("BACKGROUND", (0, 0), (-1, 0), colors.HexColor("#1f4e8c")),
             ("TEXTCOLOR", (0, 0), (-1, 0), colors.white),
