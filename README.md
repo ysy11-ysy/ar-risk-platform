@@ -24,8 +24,8 @@ streamlit run app.py
 
 浏览器打开后,在 **① 上传年报与公司信息** 页面点击
 「📥 一键载入演示公司(离线演示)」即可立刻看到完整的四步效果;
-也可上传 `docs/sample-inputs/` 中的**真实年报 PDF**(来自两家上市公司的年报与监管公告)
-体验「上传 → 抽取 → 计算 → 核验」全流程。
+如需体验「上传 → 抽取 → 计算 → 核验」的**真实 PDF 全流程**,可将真实年报 PDF 放入
+`docs/sample-inputs/`(该目录已 `.gitignore` 排除,样例 PDF 不随仓库分发)。
 
 **没有 Python 环境时**:直接双击 `docs/offline-demo.html` 即可在浏览器中查看
 平台四步界面与流程的离线演示原型(内嵌示例公司数据,与正式版界面一致)。
@@ -67,7 +67,8 @@ ar-risk-platform/
 │  ├─ report.py               # 风险评估 PDF 报告导出(reportlab 中文字体)
 │  ├─ ui.py                   # 页面样式/色值/演示公司载入
 │  ├─ industry.py             # 行业基准表加载/注入机器引擎(extra.ind_*;②页可人工覆盖)
-│  └─ external.py             # 可选联网增强:拉取行业参考 JSON(须人工核对后应用)
+│  ├─ external.py             # 可选联网增强:拉取行业参考 JSON(须人工核对后应用)
+│  └─ cache.py                # 结果缓存(惰性加载/复用)
 ├─ views/                     # 六个页面
 ├─ data/
 │  ├─ rules.json              # 规则库(自动生成:17 风险/113 信号/391 指标)
@@ -75,16 +76,18 @@ ar-risk-platform/
 │  ├─ cases.json              # 17 个经典案例(与 R001-R017 对应)
 │  ├─ industry.json           # 证监会行业门类
 │  ├─ industry_baseline.json  # 行业基准参照表(示意参考值,非权威;②页可人工覆盖/联网补充)
-│  ├─ raw/                    # 规则库原始 Excel + 解析标签
+│  ├─ raw/                    # 规则库原始 Excel + 解析标签(rules.xlsx + labels.json)
+│  ├─ baseline/               # 核验基准样例(gaohong_000851_2021.json)
 │  └─ demo/demo_company.json  # 内置演示公司(离线演示全流程)
 ├─ docs/
-│  ├─ sample-inputs/        # 示例输入:真实上市公司年报/公告 PDF(9 份)
+│  ├─ sample-inputs/        # 示例输入目录(真实年报 PDF 自行放入,已 .gitignore)
 │  └─ offline-demo.html     # 离线演示原型(无 Python 时双击浏览器查看四步界面)
 └─ scripts/
    ├─ build_rules.ps1       # 规则库 Excel → rules.json(纯 PowerShell,无需 Python)
    ├─ check_json.ps1        # 数据文件合法性自检
    ├─ check_metric_keys.ps1 # 机器指标公式科目引用自检
-   └─ final_check.ps1       # 括号配平 + 文件清单自检
+   ├─ final_check.ps1       # 括号配平 + 文件清单自检
+   └─ check_baseline.py     # 核验基准样例自检
 ```
 
 ---

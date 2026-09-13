@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>年报风险智能识别平台 · 离线演示原型</title>
+<style>
+  :root{--blue:#1f4e8c;--bg:#f5f8fc;--red:#c0392b;--orange:#e67e22;--green:#1e8449;--gray:#7f8c8d;}
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{font-family:"Microsoft YaHei","PingFang SC",sans-serif;background:var(--bg);color:#17324d;}
+  header{background:linear-gradient(120deg,#16365f,#1f4e8c 60%,#2b6cb0);color:#fff;padding:22px 34px;}
+  header h1{font-size:24px;letter-spacing:1px;}
+  header p{opacity:.85;font-size:13px;margin-top:6px;max-width:1000px;}
+  nav{display:flex;background:#fff;border-bottom:1px solid #dde5ef;padding:0 24px;flex-wrap:wrap;}
+  nav button{border:none;background:none;padding:14px 18px;font-size:14px;color:#5d6d7e;cursor:pointer;border-bottom:3px solid transparent;}
+  nav button.on{color:var(--blue);border-bottom-color:var(--blue);font-weight:700;}
+  main{padding:22px 34px;max-width:1240px;margin:0 auto;}
+  .card{background:#fff;border:1px solid #e2e8f0;border-left:4px solid var(--blue);border-radius:8px;padding:14px 18px;margin:10px 0;}
+  .card.risk{border-left-color:var(--red);} .card.warn{border-left-color:var(--orange);} .card.ok{border-left-color:var(--green);}
+  h2{font-size:18px;margin:6px 0 4px;} h3{font-size:15px;margin:10px 0 4px;}
+  .chip{display:inline-block;padding:1px 10px;border-radius:12px;color:#fff;font-size:12px;font-weight:600;margin-right:6px;}
+  .lv-h{background:var(--red);} .lv-w{background:var(--orange);} .lv-n{background:var(--green);} .lv-u{background:var(--gray);}
+  table{width:100%;border-collapse:collapse;background:#fff;font-size:13px;margin:8px 0;}
+  th{background:var(--blue);color:#fff;padding:8px 10px;text-align:left;font-weight:600;}
+  td{padding:7px 10px;border-bottom:1px solid #e8eef7;}
+  tr.lv-high td{background:#fdecea;color:#7a1f14;font-weight:600;}
+  tr.lv-watch td{background:#fdf3e7;color:#8a4b08;font-weight:600;}
+  label{display:block;font-size:13px;margin:8px 0 3px;color:#44546a;}
+  input,select{padding:7px 10px;border:1px solid #c9d6e5;border-radius:6px;width:100%;font-size:13px;}
+  .grid{display:grid;gap:12px;} .g3{grid-template-columns:repeat(3,1fr);} .g2{grid-template-columns:1fr 1fr;}
+  button.act{background:var(--blue);color:#fff;border:none;padding:10px 22px;border-radius:6px;font-size:14px;cursor:pointer;margin-top:12px;}
+  button.act:hover{background:#16365f;}
+  button.ghost{background:#fff;border:1px solid var(--blue);color:var(--blue);padding:8px 18px;border-radius:6px;cursor:pointer;font-size:13px;}
+  .muted{color:#7f8c8d;font-size:12px;} .small{font-size:12px;color:#5d6d7e;}
+  .metric-row{display:flex;gap:12px;flex-wrap:wrap;margin:8px 0;}
+  .metric{background:#fff;border:1px solid #e2e8f0;border-radius:10px;padding:10px 18px;text-align:center;min-width:130px;}
+  .metric b{display:block;font-size:20px;}
+  details{margin:6px 0;}
+  summary{cursor:pointer;color:var(--blue);font-size:13px;}
+  .note{background:#eaf1fb;border-radius:6px;padding:10px 14px;font-size:13px;margin:8px 0;}
+  footer{margin:26px auto 40px;text-align:center;color:#8a97a8;font-size:12px;max-width:1000px;}
+  .step-tip{font-size:13px;color:#44546a;margin-bottom:4px;}
+  .excerpt{background:#f7f9fc;border-left:3px solid #c9d6e5;padding:6px 10px;margin:4px 0;font-size:12px;}
+  .case-item{padding:10px 4px;border-bottom:1px dashed #dde5ef;font-size:13px;}
+  .case-item b{color:var(--blue);}
+</style>
+</head>
+<body>
+<header>
+  <h1>🔍 上市公司年报风险智能识别平台 <span style="font-size:12px;opacity:.8">(离线演示原型 · 正式版为 Streamlit + 大模型双校验)</span></h1>
+  <p>审核闭环:① 上传年报与公司信息 → ② AI 计算风险指标并初筛(高风险标红)→ ③ AI 携带规则库关键词回到年报原文核验异常原因可否接受 → ④ 经典案例对照。本页为演示界面,双击即可运行。</p>
+</header>
+<nav id="tabs">
+  <button class="on" data-t="s1">① 上传年报与公司信息</button>
+  <button data-t="s2">② 指标计算与初筛</button>
+  <button data-t="s3">③ AI 原文核验与最终结论</button>
+  <button data-t="s4">④ 经典案例库</button>
+</nav>
+<main>
+<!-- ============ 第一步 ============ -->
+<section id="s1" class="sec">
+  <h2>① 上传年报与公司信息</h2>
+  <p class="step-tip">选择公司所属行业,上传年报 PDF 及关联资料。正式版在此完成 PDF 解析与三大报表科目自动抽取(可人工修订)。</p>
+  <div class="grid g3">
+    <div><label>公司全称</label><input id="cname" value="华辰智能制造股份有限公司"></div>
+    <div><label>证券代码</label><input id="ccode" value="6000XX"></div>
+    <div><label>审计年度</label><input id="cyear" value="2023"></div>
+  </div>
+  <div class="grid g3">
+    <div><label>所属行业(证监会门类)</label>
+      <select id="cind">
+        <option>制造业</option><option>农、林、牧、渔业</option><option>采矿业</option>
+        <option>电力、热力、燃气及水生产和供应业</option><option>建筑业</option>
+        <option>批发和零售业</option><option>交通运输、仓储和邮政业</option>
+        <option>信息传输、软件和信息技术服务业</option><option>金融业</option><option>房地产业</option>
+        <option>租赁和商务服务业</option><option>文化、体育和娱乐业</option><option>综合</option>
+      </select></div>
+    <div><label>年报 PDF(多选)</label><input type="file" multiple accept="application/pdf"></div>
+    <div><label>关联资料(财报 JSON / 问询函,可选)</label><input type="file" accept=".json,.xlsx,.pdf"></div>
+  </div>
+  <div style="display:flex;gap:10px;align-items:center;margin-top:14px">
+    <button class="act" onclick="goto(2)">🚀 解析年报并进入第②步(示例)</button>
+    <button class="ghost" onclick="loadDemo()">📥 载入示例公司(华辰智造)</button>
+    <span id="loadinfo" class="muted"></span>
+  </div>
+  <div class="note">离线演示说明:本页内置「示例公司」的已抽取财务科目与 AI 计算结果;正式版通过 <b>pdfplumber 解析 + 大模型抽取</b> 生成同样结构的数据(界面一致)。</div>
+</section>
+
+<!-- ============ 第二步 ============ -->
+<section id="s2" class="sec" style="display:none">
+  <h2>② 指标计算与初筛 <span class="small">数值硬规则 + 大模型全量计算,双轨互验</span></h2>
+  <div class="note" id="calcNote">机器硬规则实时计算核心指标;大模型按 17 项风险 × 113 信号逐项计算并判定。下表为示例公司初筛结果:<b>高风险标红、关注标橙</b>。</div>
+  <div class="metric-row">
+    <div class="metric"><span class="muted">计算指标</span><b id="mTotal">9</b></div>
+    <div class="metric"><span class="muted" style="color:var(--red)">高风险</span><b id="mHigh" style="color:var(--red)">6</b></div>
+    <div class="metric"><span class="muted" style="color:var(--orange)">关注</span><b id="mWatch" style="color:var(--orange)">3</b></div>
+    <div class="metric"><span class="muted" style="color:var(--green)">正常/未触发</span><b id="mNormal">0</b></div>
+  </div>
+  <table id="calcTable">
+    <thead><tr><th>风险</th><th>信号</th><th>指标</th><th>计算值</th><th>判定</th><th>机器判定依据(规则库)</th></tr></thead>
+    <tbody></tbody>
+  </table>
+  <button class="act" onclick="goto(3)">➡️ 进入第③步:AI 原文核验(6+3 项疑点)</button>
+  <p class="muted" style="margin-top:6px">注:正式版在 LLM 列同屏显示机器与大模型两轨数值,差异处提示人工复核。</p>
+</section>
+
+<!-- ============ 第三步 ============ -->
+<section id="s3" class="sec" style="display:none">
+  <h2>③ AI 原文核验与最终结论 <span class="small">关键词自动抓取年报原文 → 判断异常原因可否接受</span></h2>
+  <p class="step-tip">对第②步的疑点,AI 用规则库 RAG 关键词在年报原文中定位证据段,判定:产生原因 → 原因类型 → 是否可接受 → 最终结论 → 需人工复核点。</p>
+  <div class="metric-row">
+    <div class="metric"><span class="muted">核验信号</span><b id="vTotal">4</b></div>
+    <div class="metric"><span class="muted" style="color:var(--red)">确定为风险点</span><b id="vRisk" style="color:var(--red)">2</b></div>
+    <div class="metric"><span class="muted" style="color:var(--orange)">存疑-建议关注</span><b id="vDoubt" style="color:var(--orange)">1</b></div>
+    <div class="metric"><span class="muted" style="color:var(--green)">可接受-无问题</span><b id="vOk" style="color:var(--green)">1</b></div>
+  </div>
+  <div id="verifyCards"></div>
+  <button class="act" onclick="goto(4)">➡️ 对照第④步:经典案例库(R001 曾发生在哪些公司、如何处罚)</button>
+</section>
+
+<!-- ============ 第四步 ============ -->
+<section id="s4" class="sec" style="display:none">
+  <h2>④ 经典舞弊案例库 <span class="small">17 个监管处罚案例,与规则库 R001-R017 一一对应</span></h2>
+  <p class="step-tip">案例来源:证监会及派出机构行政处罚决定书(公开信息)。选中风险编号可联动查看曾涉案的公司、违规原因与处罚。</p>
+  <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin:8px 0">
+    <label style="margin:0">按风险筛选:</label>
+    <select id="caseFilter" onchange="renderCases()" style="width:auto">
+      <option value="">全部 17 项</option>
+    </select>
+    <span id="caseCount" class="muted"></span>
+  </div>
+  <div id="caseList"></div>
+</section>
+</main>
+<footer>《上市公司年报风险智能识别平台》离线演示原型 · 仅用于界面与流程演示,结论需以正式版 + 人工复核为准 · docs/offline-demo.html</footer>
+
+<script>
+/* ===== 演示数据(与 data/demo/demo_company.json 一致的精简版)===== */
+var MACHINE = [
+ ["R001","R001-S01 收入现金流背离","净现比","-0.15 倍","高风险","净现比为负(经营净现金流-9200万/净利润61000万):任意一年为负=高风险"],
+ ["R001","R001-S01 收入现金流背离","收现比","0.67 倍","高风险","<1 且连续 2 年下降(0.74→0.73→0.67)=高风险"],
+ ["R001","R001-S01 收入现金流背离","营收现金含量","0.69 倍","高风险","连续2年<0.8(0.75→0.69)=高风险"],
+ ["R001","R001-S02 应收账款异常膨胀","应收账款增速差","+66.3 个百分点","高风险","应收增速98.4%−营收增速32.1%>30pct=高风险"],
+ ["R001","R001-S02 应收账款异常膨胀","应收账款周转天数","106.2 天","高风险","同比增加约38天>30天=高风险"],
+ ["R001","R001-S02 应收账款异常膨胀","DSRI","1.53 倍","高风险",">1.5 阈值=高风险"],
+ ["R001","R001-S06 应计利润异常","TATA","11.6%","高风险",">10%=高风险(连续口径提示人工复核)"],
+ ["R001","R001-S08 期末收入确认异常","Q4 收入占比","38.8%","关注","30%~40%=关注(正常约25%)"],
+ ["R001","R001-S08 期末收入确认异常","Q4 收入环比增速","+70.5%","高风险",">50% 且无合理季节性解释=高风险"]
+];
+var VERIFY = [
+ {risk:"R001-S01", name:"收入现金流背离", verdict:"确定为风险点", cls:"risk",
+  metrics:"净现比 -0.15倍 · 收现比 0.67倍 · 营收现金含量 0.69倍(均高风险)",
+  explanation:"年报解释现金流下降系『销售回款减少、部分大额项目年底集中验收未到结算期』,但未披露应收账款账龄变化与期后回款金额,无法验证『集中验收』与应收增加约6亿元的幅度是否匹配。",
+  type:"无合理解释", accept:"否", evidence:"经营活动产生的现金流量净额较上年同期减少3.77亿元,主要系销售回款减少所致。",
+  manual:["函证前五大客户期末应收余额及期后回款","核对销售合同信用期与实际回款账龄","核查大客户是否为新增或关联主体"],
+  kws:"净现比;收现比;利润含金量;经营现金流为负;增收不增现",
+  excerpts:[["演示摘录","经营活动产生的现金流量净额较上年同期减少3.77亿元,主要系销售回款减少所致。"],["演示摘录","应收账款余额较期初大幅增加,主要系部分大额项目年底集中验收尚未到结算期,销售回款相应滞后。"]]},
+ {risk:"R001-S02", name:"应收账款异常膨胀", verdict:"确定为风险点", cls:"risk",
+  metrics:"应收增速差 +66.3pct · 周转天数 106.2天 · DSRI 1.53(均高风险)",
+  explanation:"应收账款增速(98.4%)远超营收增速(32.1%),年报仅以『客户信用状况良好』说明,未提供账龄分布、逾期金额或期后回款证据;DSRI=1.53 已越过舞弊识别阈值。",
+  type:"披露缺陷", accept:"否", evidence:"应收账款期末余额较期初增长98.4%,主要客户信用状况良好,已按账龄组合计提坏账准备。",
+  manual:["获取账龄明细表核查1年以上占比","对期末前五名客户发函并追踪回函","检查坏账计提比例与同行差异"],
+  kws:"应收账款;坏账准备;账龄;信用政策",
+  excerpts:[["演示摘录","应收账款期末余额12.1亿元,较期初增长98.4%,主要客户信用状况良好。"]]},
+ {risk:"R002-S01", name:"期末收入确认异常", verdict:"存疑-建议关注", cls:"warn",
+  metrics:"Q4 占比 38.8%(关注)· Q4 环比 +70.5%(高风险)· 下半年占比 61.6%(关注)",
+  explanation:"年报给出『行业季节性+集中验收』解释,方向合理;但Q4环比增速70.5%显著超过前三季度波动,且未提供四季度验收/签收单据佐证,无法完全排除期末突击确认。",
+  type:"季节性或项目性", accept:"否(证据不足)", evidence:"公司主要客户项目验收多集中于第四季度,收入确认存在一定季节性特征。",
+  manual:["抽查Q4大额销售合同签收/验收单据与物流记录","比较同行Q4占比验证季节性","核查资产负债表日后大额销售退回"],
+  kws:"第四季度;收入确认;年末;集中验收;季节性",
+  excerpts:[["演示摘录","公司主要客户为大型制造企业,项目验收多集中于第四季度。"]]},
+ {risk:"R001-S03", name:"毛利率异常偏高(说明:该异常获合理解释→放行)", verdict:"可接受-视为无问题", cls:"ok",
+  metrics:"毛利率同比 +3.5pct · 销售毛利率 24.5%(关注,行业对比)",
+  explanation:"毛利率上升可由产品结构升级(高毛利新产品收入占比18%→31%)与原材料降价解释,年报披露了量化构成依据,与经营描述一致,原因可接受。",
+  type:"经营扩张", accept:"是", evidence:"综合毛利率上升主要系产品结构升级,高毛利新产品收入占比由18%提升至31%,同时部分原材料价格回落所致。",
+  manual:["抽查高毛利新产品前十大客户销售真实性","复核分产品毛利率口径一致性"],
+  kws:"毛利率;产品结构;原材料;高毛利产品",
+  excerpts:[["演示摘录","高毛利新产品收入占比由18%提升至31%,同时部分原材料价格回落所致。"]]}
+];
+var CASES = [
+ ["R001","大唐高鸿(高鸿股份)","2015-2023子公司无实物流虚假贸易,体外资金闭环,累计虚增营收189.03亿、利润7622.59万,年报虚假记载并构成欺诈发行","证监处罚〔2026〕10号"],
+ ["R002","长园集团(600525)","子公司长园和鹰对海外代理商未交付即提前确认收入,虚增2016/2017年收入利润(阴阳合同)","深圳证监局〔2020〕7号"],
+ ["R003","*ST九有","将关联方利益输送包装为非经常性损益实现扭亏,年报未披露交易实质","证监处罚〔2025〕144号"],
+ ["R004","司尔特(002538)","虚假采购少结转成本、跨期调节,2021年虚增利润3634.67万元,毛利率异常走高","安徽证监局〔2026〕4号"],
+ ["R005","ST天圣(002872)","实控人设账外资金池体外承担销售推广费,账面少记销售费用虚增利润","重庆证监局〔2025〕4号"],
+ ["R006","东尼电子(603595)","将应费用化的不良晶体计入存货,少确认研发费用虚增利润","浙江证监局〔2025〕18号"],
+ ["R007","紫鑫药业(002118,退市)","2013-2021年虚增林下参存货近60亿,跌价长期不计提,资金被占用","证监处罚〔2024〕122号"],
+ ["R008","*ST利源(002501)","虚增在建工程62.84亿,完工不转固少提折旧","吉林证监局〔2022〕2号"],
+ ["R009","金亚科技(300028,退市)","伪造银行单据虚增存款2.18亿,『大存大贷』典型","证监处罚〔2018〕10号"],
+ ["R010","ST实达(600734)","商誉资产组可回收金额评估错误,少计减值8788.56万虚增净利","福建证监局〔2022〕2号"],
+ ["R011","爱迪尔(002740,退市)","应收逾期不调低坏账计提,少确认信用减值损失美化利润","证监处罚〔2025〕89号"],
+ ["R012","超华科技(002288)","支付往来款向实控人输送资金,关联交易非关联化、未披露","证监处罚〔2025〕128号"],
+ ["R013","华扬联众(603825)","资金经子公司流向实控人体外公司,非经营性资金占用未披露","北京证监局〔2025〕18号"],
+ ["R014","*ST天马(002122)","未经审议为实控人企业担保2.6亿,年报完全隐瞒","证监处罚〔2019〕120号"],
+ ["R015","*ST东洋(002086)","已发生担保赔偿义务不确认预计负债,后期大额补提","山东证监局〔2022〕1号"],
+ ["R016","云内动力(000903)","无客观依据随意变更折旧年限、坏账计提比例调节利润","云南证监局〔2025〕2号"],
+ ["R017","ST辅仁(600781,退市)","隐瞒巨额资金占用、债务、股权质押,年报虚假记载与重大遗漏","证监处罚〔2020〕79号"]
+];
+var ACT = {s1:"① 上传年报与公司信息",s2:"② 指标计算与初筛",s3:"③ AI 原文核验与最终结论",s4:"④ 经典案例库"};
+function chip(txt){var c={高风险:"lv-h",关注:"lv-w",正常:"lv-n",未触发:"lv-u","确定为风险点":"lv-h","存疑-建议关注":"lv-w","可接受-视为无问题":"lv-n"}[txt]||"lv-u";return '<span class="chip '+c+'">'+txt+'</span>';}
+function goto(n){
+  document.querySelectorAll('.sec').forEach(function(s){s.style.display='none';});
+  document.getElementById('s'+n).style.display='block';
+  document.querySelectorAll('#tabs button').forEach(function(b){b.classList.toggle('on',b.dataset.t==='s'+n);});
+  if(n===2)renderCalc(); if(n===3)renderVerify(); if(n===4)renderCases(); window.scrollTo(0,0);
+}
+function loadDemo(){ document.getElementById('loadinfo').textContent='✓ 已载入示例公司(演示数据):华辰智能制造股份有限公司,2023 年度'; }
+/* 第二步 */
+function renderCalc(){
+  var tb=document.getElementById('calcTable').querySelector('tbody'); tb.innerHTML='';
+  var nH=0,nW=0;
+  MACHINE.forEach(function(r){
+    var tr=document.createElement('tr');
+    if(r[4]==='高风险'){tr.className='lv-high';nH++;}else if(r[4]==='关注'){tr.className='lv-watch';nW++;}
+    [0,1,2,3].forEach(function(i){var td=document.createElement('td');td.textContent=r[i];tr.appendChild(td);});
+    var td4=document.createElement('td');td4.innerHTML=chip(r[4]);tr.appendChild(td4);
+    var td5=document.createElement('td');td5.textContent=r[5];tr.appendChild(td5);
+    tb.appendChild(tr);
+  });
+  document.getElementById('mTotal').textContent=MACHINE.length;
+  document.getElementById('mHigh').textContent=nH; document.getElementById('mWatch').textContent=nW;
+  document.getElementById('mNormal').textContent=MACHINE.length-nH-nW;
+}
+/* 第三步 */
+function renderVerify(){
+  var box=document.getElementById('verifyCards'); box.innerHTML='';
+  var nR=0,nD=0,nO=0;
+  VERIFY.forEach(function(v){
+    if(v.verdict==='确定为风险点')nR++; else if(v.verdict==='存疑-建议关注')nD++; else nO++;
+    var d=document.createElement('div'); d.className='card '+v.cls;
+    var h='<div style="font-weight:700;font-size:14px">'+v.risk+' '+v.name+' '+chip(v.verdict)+'</div>'+
+      '<div class="small">异常指标:'+v.metrics+'</div>'+
+      '<p style="margin:6px 0 2px"><b>年报给出的原因解释:</b>'+v.explanation+'</p>'+
+      '<p style="margin:2px 0"><b>原因类型:</b>'+v.type+'　<b>可否接受:</b>'+(v.accept==='是'?'✅ 是(有实质业务证据)':'❌ '+(v.accept||'不能接受'))+'</p>'+
+      '<p style="margin:2px 0"><b>年报证据原文:</b><i>“'+v.evidence+'”</i></p>'+
+      '<div style="margin:4px 0 2px;color:#8b4513"><b>🔎 需人工复核:</b><ul style="margin:2px 0 0 20px">'+v.manual.map(function(x){return '<li>'+x+'</li>';}).join('')+'</ul></div>'+
+      '<details><summary>查看命中的年报原文段落(关键词定位)</summary>'+v.excerpts.map(function(e){return '<div class="excerpt">[第'+e[0]+'页] '+e[1]+'</div>';}).join('')+'</details>';
+    d.innerHTML=h; box.appendChild(d);
+  });
+  document.getElementById('vTotal').textContent=VERIFY.length;
+  document.getElementById('vRisk').textContent=nR; document.getElementById('vDoubt').textContent=nD; document.getElementById('vOk').textContent=nO;
+}
+/* 第四步 */
+function renderCases(){
+  var sel=document.getElementById('caseFilter');
+  var list=document.getElementById('caseList');
+  if(sel.options.length<=1){ CASES.forEach(function(c){var o=document.createElement('option');o.value=c[0];o.textContent=c[0]+' '+c[1];sel.appendChild(o);}); }
+  var f=sel.value, items=CASES.filter(function(c){return !f||c[0]===f;});
+  document.getElementById('caseCount').textContent='共 '+items.length+' 个案例';
+  list.innerHTML='';
+  items.forEach(function(c){
+    var d=document.createElement('div'); d.className='case-item';
+    d.innerHTML='<b>'+c[0]+'</b> '+c[1]+' — '+c[2]+'<div class="small" style="margin-top:2px">处罚:'+c[3]+'</div>';
+    list.appendChild(d);
+  });
+}
+document.querySelectorAll('#tabs button').forEach(function(b){b.addEventListener('click',function(){goto(b.dataset.t.replace('s',''));});});
+renderCalc(); renderVerify(); renderCases();
+</script>
+</body>
+</html>

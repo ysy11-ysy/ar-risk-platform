@@ -1,0 +1,18 @@
+{
+  "labels": ["风险编号", "风险名称", "风险类型", "定义解释", "信号编号", "信号名称", "信号类型", "公式", "数据来源", "阈值", "RAG_Keywords", "Evidence_Required", "信号1", "指标1"],
+  "tierWords": ["正常", "关注", "高风险"],
+  "keyLabels": {
+    "riskId": "风险编号",
+    "riskName": "风险名称",
+    "category": "风险类型",
+    "definition": "定义解释",
+    "signalIds": "信号编号",
+    "signalNames": "信号名称",
+    "signalTypes": "信号类型",
+    "formula": "公式",
+    "dataSource": "数据来源",
+    "threshold": "阈值",
+    "keywords": "RAG_Keywords",
+    "evidence": "Evidence_Required"
+  }
+}
